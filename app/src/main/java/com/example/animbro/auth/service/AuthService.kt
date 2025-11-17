@@ -1,7 +1,6 @@
 package com.example.animbro.auth.service
 
 import android.content.Context
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -10,7 +9,6 @@ import com.google.android.gms.tasks.Task
 import com.google.firebase.Firebase
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseAuthEmailException
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.UserProfileChangeRequest

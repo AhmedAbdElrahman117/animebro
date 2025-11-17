@@ -1,6 +1,5 @@
 package com.example.animbro
 
-import org.intellij.lang.annotations.RegExp
 
 object Constants {
     val emailRegex = Regex(

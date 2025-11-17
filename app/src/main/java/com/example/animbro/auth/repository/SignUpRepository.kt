@@ -1,7 +1,6 @@
 package com.example.animbro.auth.repository
 
 import AuthException
-import android.util.Log
 import com.example.animbro.Constants
 import com.example.animbro.auth.service.AuthService
 import com.google.firebase.auth.FirebaseUser
