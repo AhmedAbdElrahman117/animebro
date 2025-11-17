@@ -12,6 +12,29 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AnimBro">
         <activity
+            android:name=".auth.screens.VerifyEmailSent"
+            android:exported="false"
+            android:label="@string/title_activity_verify_email_sent"
+            android:theme="@style/Theme.AnimBro" />
+        <activity
+            android:name=".auth.screens.ForgotPassword"
+            android:exported="false"
+            android:label="@string/title_activity_forgot_password"
+            android:theme="@style/Theme.AnimBro" />
+        <activity
+            android:name=".auth.screens.SignUp"
+            android:exported="false"
+            android:label="@string/title_activity_sign_up"
+            android:theme="@style/Theme.AnimBro" />
+        <activity
+            android:name=".auth.screen.SignUp"
+            android:exported="false"
+            android:label="@string/title_activity_sign_up"
+            android:theme="@style/Theme.AnimBro" />
+        <activity
+            android:name=".screens.SignUp"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"
