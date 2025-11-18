@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "473580319957",
+    "project_id": "animbro",
+    "storage_bucket": "animbro.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:473580319957:android:0d0a992b0211a382fdde5c",
+        "android_client_info": {
+          "package_name": "com.example.animbro"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "473580319957-4hmg35b8kbrjk1tuo0o84n1b3nvhd7fq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.animbro",
+            "certificate_hash": "6c03bc0ba3958b2567b7dd0d70123733660bef8e"
+          }
+        },
+        {
+          "client_id": "473580319957-epfmikgc3poe4514g9ksrm93k800h0dt.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBVYth8G8xU-9jrsLMqMN2mb4q3-p4t44M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "473580319957-epfmikgc3poe4514g9ksrm93k800h0dt.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
