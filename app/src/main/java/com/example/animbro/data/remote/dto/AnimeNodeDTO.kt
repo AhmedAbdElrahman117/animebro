@@ -12,5 +12,4 @@ data class AnimeNodeDTO(
     val status: String,
     @SerializedName("num_episodes")
     val episodes: Int,
-    
     )

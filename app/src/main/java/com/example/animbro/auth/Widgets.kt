@@ -123,7 +123,7 @@ fun ForegroundLayer(
 fun Logo(modifier: Modifier = Modifier) {
     Box(modifier = modifier) {
         Image(
-            painter = painterResource(R.drawable.anime_bro_logo),
+            painter = painterResource(R.drawable.animebro_logo),
             contentDescription = "AnimeBroLogo",
             modifier = Modifier
                 .align(Alignment.TopCenter)
