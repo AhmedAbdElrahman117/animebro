@@ -3,6 +3,7 @@ package com.example.animbro.auth.repository
 import AuthException
 import com.example.animbro.Constants
 import com.example.animbro.auth.service.AuthService
+import com.example.animbro.auth.service.FirestoreException
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.UserProfileChangeRequest
 
@@ -52,13 +53,23 @@ class SignUpRepository {
                         UserProfileChangeRequest.Builder().setDisplayName(userName).build()
                     ).addOnCompleteListener {
                         if (it.isSuccessful) {
-                            onSuccess(user);
+                            setUser(
+                                user.uid,
+                                userName,
+                                email,
+                                {
+                                    onSuccess(user);
+                                },
+                                {
+                                    onFailure(it);
+                                },
+                            );
                         } else {
-                            onFailure(AuthException(it.exception!!).message);
+                            onFailure(AuthException(it.exception).message);
                         }
                     }
                 } else {
-                    onFailure(AuthException(it.exception!!).message);
+                    onFailure(AuthException(it.exception).message);
                 }
             };
         }
@@ -74,7 +85,23 @@ class SignUpRepository {
             if (it.isSuccessful) {
                 onSuccess();
             } else {
-                onFailure(AuthException(it.exception!!).message);
+                onFailure(AuthException(it.exception).message);
+            }
+        }
+    }
+
+    fun setUser(
+        userID: String,
+        userName: String,
+        email: String,
+        onSuccess: () -> Unit,
+        onFailure: (message: String) -> Unit
+    ) {
+        auth.setUser(userID, userName, email).addOnCompleteListener {
+            if (it.isSuccessful) {
+                onSuccess();
+            } else {
+                onFailure(FirestoreException(it.exception).message);
             }
         }
     }
