@@ -65,6 +65,14 @@ class MainActivity : ComponentActivity() {
             AnimBroTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     AuthBackground(Modifier.padding(innerPadding)) {
+                        Text(
+                            "Login",
+                            modifier = Modifier
+                                .padding(vertical = 24.dp)
+                                .align(Alignment.CenterHorizontally),
+                            fontSize = 28.sp,
+                            fontWeight = FontWeight.Bold
+                        );
                         EmailTextField(
                             value = email,
                             modifier = Modifier

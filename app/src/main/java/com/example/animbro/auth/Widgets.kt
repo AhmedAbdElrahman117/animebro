@@ -46,8 +46,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.animbro.R
@@ -102,19 +104,12 @@ fun ForegroundLayer(
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp),
         shape = RoundedCornerShape(24.dp),
         content = {
-            Column(
-                modifier = Modifier
-                    .padding(12.dp)
-                    .fillMaxSize(),
-                verticalArrangement = Arrangement.Center,
-            ) {
-                if (showLogo)
-                    Logo(
-                        modifier
-                            .padding(28.dp)
-                    )
-                content()
-            }
+            if (showLogo)
+                Logo(
+                    modifier
+                        .padding(top = 40.dp, bottom = 20.dp)
+                )
+            content()
         },
     )
 }
@@ -271,9 +266,10 @@ fun AuthBackground(
     showLogo: Boolean = true,
     content: @Composable (ColumnScope.() -> Unit)
 ) {
-    Box(modifier) {
+    Box {
         Background(Modifier.fillMaxSize());
         ForegroundLayer(
+            modifier,
             content = content,
             showLogo = showLogo
         )
