@@ -13,9 +13,12 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.auth.auth
+import com.google.firebase.firestore.DocumentReference
+import com.google.firebase.firestore.FirebaseFirestore
 
 class AuthService {
-    private var auth: FirebaseAuth = Firebase.auth;
+    private val auth: FirebaseAuth = Firebase.auth;
+    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance();
 
     fun login(email: String, password: String): Task<AuthResult> {
         return auth.signInWithEmailAndPassword(email, password);
@@ -57,5 +60,14 @@ class AuthService {
         } catch (e: ApiException) {
             Toast.makeText(context, "Google Login Failed", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    fun setUser(userID: String, userName: String, email: String): Task<Void> {
+        val data = mapOf<String, String>(
+            "id" to userID,
+            "username" to userName,
+            "email" to email,
+        );
+        return firestore.collection("users").document(userID).set(data);
     }
 }

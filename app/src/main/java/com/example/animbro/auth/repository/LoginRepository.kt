@@ -27,7 +27,7 @@ class LoginRepository {
                 if (it.isSuccessful) {
                     onSuccess(it.result.user?.isEmailVerified ?: false);
                 } else {
-                    onFailure(AuthException(it.exception!!).message);
+                    onFailure(AuthException(it.exception).message);
                 }
             };
         }
@@ -49,7 +49,7 @@ class LoginRepository {
                 if (it.isSuccessful) {
                     onSuccess();
                 } else {
-                    onFailure(AuthException(it.exception!!).message);
+                    onFailure(AuthException(it.exception).message);
                 }
             }
         }

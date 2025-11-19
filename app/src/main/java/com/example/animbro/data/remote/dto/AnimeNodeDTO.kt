@@ -7,6 +7,7 @@ data class AnimeNodeDTO(
     val title: String,
     @SerializedName("main_picture")
     val image: MainPictureDTO?,
+    // nullable int
     val rank: Int?,
     val status: String,
     @SerializedName("num_episodes")

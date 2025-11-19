@@ -2,6 +2,7 @@ package com.example.animbro
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
@@ -47,6 +48,7 @@ import com.example.animbro.auth.repository.LoginRepository
 import com.example.animbro.auth.screens.ForgotPassword
 import com.example.animbro.auth.screens.SignUp
 import com.example.animbro.ui.theme.AnimBroTheme
+import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,6 +65,14 @@ class MainActivity : ComponentActivity() {
             AnimBroTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     AuthBackground(Modifier.padding(innerPadding)) {
+                        Text(
+                            "Login",
+                            modifier = Modifier
+                                .padding(vertical = 24.dp)
+                                .align(Alignment.CenterHorizontally),
+                            fontSize = 28.sp,
+                            fontWeight = FontWeight.Bold
+                        );
                         EmailTextField(
                             value = email,
                             modifier = Modifier
@@ -163,6 +173,16 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
+        }
+    }
+
+    override fun onStart() {
+        if (FirebaseAuth.getInstance().currentUser != null) {
+            // TODO add intent to the page you want to open if user Logged in
+            // startActivity(Intent(this, SignUp::class.java))
+            super.onStart()
+        } else {
+            super.onStart()
         }
     }
 }
