@@ -1,13 +1,15 @@
-package com.example.animbro.auth.service
+package com.example.animbro.core
 
-import com.example.animbro.core.AppException
 import com.google.firebase.FirebaseException
 import com.google.firebase.FirebaseNetworkException
 import com.google.firebase.firestore.FirebaseFirestoreException
 
 class FirestoreException(exception: Exception?) : AppException(exception) {
 
-    override fun getMessage(): String {
+    override val message: String
+        get() = getErrorMessage();
+
+    override fun getErrorMessage(): String {
         val e = original ?: return "Database error. Please try again."
 
         if (e is FirebaseNetworkException) {

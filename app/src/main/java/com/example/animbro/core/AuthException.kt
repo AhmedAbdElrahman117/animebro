@@ -3,7 +3,10 @@ import com.google.firebase.auth.*
 
 class AuthException(exception: Exception?) : AppException(exception) {
 
-    override fun getMessage(): String {
+    override val message: String
+        get() = getErrorMessage();
+
+    override fun getErrorMessage(): String {
         val e = original ?: return "Authentication failed. Please try again."
 
         return when (e) {

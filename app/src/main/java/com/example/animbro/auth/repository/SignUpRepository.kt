@@ -3,7 +3,7 @@ package com.example.animbro.auth.repository
 import AuthException
 import com.example.animbro.Constants
 import com.example.animbro.auth.service.AuthService
-import com.example.animbro.auth.service.FirestoreException
+import com.example.animbro.core.FirestoreException
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.UserProfileChangeRequest
 

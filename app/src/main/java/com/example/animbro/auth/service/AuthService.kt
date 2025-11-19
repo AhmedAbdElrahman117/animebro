@@ -62,12 +62,12 @@ class AuthService {
         }
     }
 
-    fun setUser(userID: String, userName: String, email: String): Task<DocumentReference> {
+    fun setUser(userID: String, userName: String, email: String): Task<Void> {
         val data = mapOf<String, String>(
             "id" to userID,
             "username" to userName,
             "email" to email,
         );
-        return firestore.collection("users").add(data);
+        return firestore.collection("users").document(userID).set(data);
     }
 }

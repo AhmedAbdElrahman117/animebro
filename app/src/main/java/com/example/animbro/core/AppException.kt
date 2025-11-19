@@ -3,8 +3,7 @@ package com.example.animbro.core
 abstract class AppException(
     val original: Exception?
 ) {
-    abstract fun getMessage(): String
+    abstract fun getErrorMessage(): String
 
-    val message: String
-        get() = getMessage()
+    abstract val message: String;
 }
