@@ -1,6 +1,11 @@
 package com.example.animbro
 
+import android.annotation.SuppressLint
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Intent
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -8,6 +13,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContract
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -38,6 +46,8 @@ import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import com.example.animbro.auth.AuthBackground
 import com.example.animbro.auth.CustomDivider
 import com.example.animbro.auth.EmailTextField
@@ -174,6 +184,44 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+
+    }
+    private fun notificationHanlder(): ActivityResultLauncher<String> {
+        val handler = registerForActivityResult(ActivityResultContracts.RequestPermission()){
+            if(it){
+            sendNotificationMain()
+            }
+            else{
+
+            }
+        }
+        return handler
+    }
+    private fun notificationChannel(){
+        val channel = NotificationChannel("30","Notifications", NotificationManager.IMPORTANCE_DEFAULT)
+        channel.description = "Main Notifications"
+       val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        manager.createNotificationChannel(channel)
+    }
+    @SuppressLint("MissingPermission")
+    private fun sendNotificationMain(){
+        val bitmap= BitmapFactory.decodeResource(resources,R.drawable.animebro_logo)
+        val builder = NotificationCompat.Builder(this,"30")
+        //val i = Intent(this,AnyActivity::class.java)
+        //intent to open the desired (home or favourite etc..)
+//        val pendingintent = PendingIntent.getActivity(this
+//            ,90
+//            ,i
+//            , PendingIntent.FLAG_MUTABLE)
+        builder.
+                setSmallIcon(R.drawable.animebro_logo)
+            .setContentTitle("What's New")
+            .setContentText("See if something came up !!")
+            .setAutoCancel(true)
+            .setStyle(NotificationCompat.BigPictureStyle().bigPicture(bitmap))
+        NotificationManagerCompat
+            .from(this)
+            .notify(10,builder.build())
     }
 
     override fun onStart() {
@@ -270,6 +318,8 @@ fun ForgotPassword(modifier: Modifier = Modifier) {
         text = text,
     )
 }
+
+
 
 
 
