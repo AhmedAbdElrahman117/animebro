@@ -1,5 +1,6 @@
 package com.example.animbro.repositories
 
+import android.util.Log
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import com.example.animbro.data.local.dao.WatchListDAO
 import com.example.animbro.data.mapper.toDomain
@@ -25,10 +26,16 @@ class AnimeRepositoryImp(
             )
 
             if (response.isSuccessful) {
+                Log.d("AnimeRepositoryImp", "getAnimeRanking: ${response.body()}")
                 response.body()?.data?.map { it.node.toDomain() } ?: emptyList()
-            } else emptyList()
+            } else {
+
+                Log.d("AnimeRepositoryImp", "getAnimeRanking is not successful")
+                emptyList()
+            }
 
         } catch (e: Exception) {
+            Log.d("AnimeRepositoryImp", "getAnimeRanking: ${e.message}")
             e.printStackTrace()
             emptyList()
         }

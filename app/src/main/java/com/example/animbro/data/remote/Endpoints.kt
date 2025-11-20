@@ -8,7 +8,7 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface Endpoints {
-    @GET("/v2/anime")
+    @GET("v2/anime")
     suspend fun searchAnime(
         @Query("q") query: String,
         @Query("limit") limit: Int = 10,
@@ -16,13 +16,13 @@ interface Endpoints {
         @Query("fields") fields: String = "id,title,main_picture,start_date,end_date,synopsis,rank,popularity,num_scoring_users,status,genres,num_episodes,average_episode_duration,rating,pictures,recommendations,videos"
     ): Response<AnimeListResponseDTO>
 
-    @GET("/v2/anime/{anime_id}")
+    @GET("v2/anime/{anime_id}")
     suspend fun getAnimeDetails(
         @Path("anime_id") animeId: Int,
         @Query("fields") fields: String = "id,title,main_picture,start_date,end_date,synopsis,rank,popularity,num_scoring_users,status,genres,num_episodes,average_episode_duration,rating,pictures,recommendations,videos"
     ): Response<AnimeNodeDTO>
 
-    @GET("/v2/anime/ranking")
+    @GET("v2/anime/ranking")
     suspend fun getAnimeRanking(
         @Query("ranking_type") rankingType: String = "all",
         @Query("limit") limit: Int = 10,

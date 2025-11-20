@@ -33,7 +33,7 @@ fun WatchListModel.toDomain(): Anime {
     return Anime(
         id = id,
         title = title,
-        image = image,
+        image = null,
     )
 }
 
@@ -41,7 +41,7 @@ fun Anime.toDomain(category: String): WatchListModel {
     return WatchListModel(
         id = id,
         title = title,
-        image = image,
+        image = image?.medium,
         category = category
     )
 }

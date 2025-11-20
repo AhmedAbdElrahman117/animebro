@@ -9,7 +9,7 @@ data class WatchListModel(
     @PrimaryKey(autoGenerate = false)
     val id: Int,
     val title: String,
-    val image: MainPictureDTO?,
+    val image: String?,
     val category: String,
     val isFavourite: Boolean = false
 )

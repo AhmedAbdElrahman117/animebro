@@ -84,8 +84,19 @@ dependencies {
     implementation("androidx.credentials:credentials:1.2.0")
     implementation("androidx.credentials:credentials-play-services-auth:1.2.0")
     implementation("com.airbnb.android:lottie-compose:6.0.0")
-    implementation("androidx.room:room-runtime:2.6.1")
-    implementation("androidx.room:room-ktx:2.6.1")
-    kapt("androidx.room:room-compiler:2.6.1")
+    implementation("androidx.room:room-runtime:2.8.4")
+    implementation("androidx.room:room-ktx:2.8.4")
+    kapt("androidx.room:room-compiler:2.8.4")
     implementation("androidx.datastore:datastore-preferences:1.0.0")
+
+    testImplementation("io.mockk:mockk:1.13.5")
+
+    // 2. Coroutines Test: Essential for testing 'suspend' functions
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+
+    // 3. JUnit 4 (Likely already there, but make sure)
+    testImplementation("junit:junit:4.13.2")
+
+    // 4. Truth (Optional, but makes checking results easier)
+    testImplementation("com.google.truth:truth:1.1.5")
 }
