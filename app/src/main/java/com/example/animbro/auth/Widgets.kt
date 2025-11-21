@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -50,83 +51,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import com.example.animbro.R
 import com.example.animbro.auth.service.AuthService
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-
-@Composable
-fun Background(modifier: Modifier) {
-    val conf = LocalConfiguration.current;
-    val height = conf.screenHeightDp * 0.46;
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-    ) {
-        Image(
-            painter = painterResource(R.drawable.auth_background),
-            contentDescription = "Anime Background",
-            modifier = modifier,
-            contentScale = ContentScale.FillBounds,
-        )
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .height(height.dp)
-                .fillMaxWidth()
-                .background(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(
-                            Color.Transparent,
-                            Color.White.copy(alpha = 0.3f),
-                            Color.White.copy(alpha = 0.6f),
-                            Color.White.copy(alpha = 0.97f),
-                        )
-                    )
-                )
-        )
-    }
-}
-
-@Composable
-fun ForegroundLayer(
-    modifier: Modifier = Modifier,
-    showLogo: Boolean = true,
-    content: @Composable (ColumnScope.() -> Unit)
-) {
-    Card(
-        modifier = modifier
-            .padding(20.dp)
-            .fillMaxSize(),
-        colors = CardDefaults.cardColors().copy(containerColor = Color.White.copy(alpha = 0.65f)),
-        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp),
-        shape = RoundedCornerShape(24.dp),
-        content = {
-            if (showLogo)
-                Logo(
-                    modifier
-                        .padding(top = 40.dp, bottom = 20.dp)
-                )
-            content()
-        },
-    )
-}
-
-@Composable
-fun Logo(modifier: Modifier = Modifier) {
-    Box(modifier = modifier) {
-        Image(
-            painter = painterResource(R.drawable.animebro_logo),
-            contentDescription = "AnimeBroLogo",
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .fillMaxWidth()
-                .height(100.dp),
-        )
-    }
-}
 
 
 @Composable
@@ -264,6 +196,7 @@ fun PasswordTextField(
 fun AuthBackground(
     modifier: Modifier = Modifier,
     showLogo: Boolean = true,
+    isLoading: Boolean = false,
     content: @Composable (ColumnScope.() -> Unit)
 ) {
     Box {
@@ -272,6 +205,94 @@ fun AuthBackground(
             modifier,
             content = content,
             showLogo = showLogo
+        )
+        if (isLoading)
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(color = Color.Black.copy(alpha = 0.65f)),
+                contentAlignment = Alignment.Center
+
+            ) {
+                CircularProgressIndicator(color = Color.Blue)
+            }
+    }
+}
+
+@Composable
+@Preview
+fun AuthBackgroundPreview() {
+    AuthBackground { }
+}
+
+@Composable
+fun Background(modifier: Modifier) {
+    val conf = LocalConfiguration.current;
+    val height = conf.screenHeightDp * 0.46;
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+
+        Image(
+            painter = painterResource(R.drawable.auth_background),
+            contentDescription = "Anime Background",
+            modifier = modifier,
+            contentScale = ContentScale.FillBounds,
+        )
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .height(height.dp)
+                .fillMaxWidth()
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            Color.Transparent,
+                            Color.White.copy(alpha = 0.3f),
+                            Color.White.copy(alpha = 0.6f),
+                            Color.White.copy(alpha = 0.97f),
+                        )
+                    )
+                )
+        )
+    }
+}
+
+@Composable
+fun ForegroundLayer(
+    modifier: Modifier = Modifier,
+    showLogo: Boolean = true,
+    content: @Composable (ColumnScope.() -> Unit)
+) {
+    Card(
+        modifier = modifier
+            .padding(20.dp)
+            .fillMaxSize(),
+        colors = CardDefaults.cardColors().copy(containerColor = Color.White.copy(alpha = 0.65f)),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp),
+        shape = RoundedCornerShape(24.dp),
+        content = {
+            if (showLogo)
+                Logo(
+                    modifier
+                        .padding(top = 40.dp, bottom = 20.dp)
+                )
+            content()
+        },
+    )
+}
+
+@Composable
+fun Logo(modifier: Modifier = Modifier) {
+    Box(modifier = modifier) {
+        Image(
+            painter = painterResource(R.drawable.animebro_logo),
+            contentDescription = "AnimeBroLogo",
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .fillMaxWidth()
+                .height(100.dp),
         )
     }
 }

@@ -19,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -53,10 +54,14 @@ class SignUp : ComponentActivity() {
             var confirmError by rememberSaveable { mutableStateOf("") };
             var cause by rememberSaveable { mutableStateOf(ErrorCause.none) };
             val context = LocalActivity.current;
+            var isLoading by remember { mutableStateOf(false) }
 
             AnimBroTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    AuthBackground(Modifier.padding(innerPadding)) {
+                    AuthBackground(
+                        Modifier.padding(innerPadding),
+                        isLoading = isLoading,
+                    ) {
                         Box(modifier = Modifier.fillMaxWidth()) {
                             Text(
                                 "SignUp",
@@ -126,12 +131,14 @@ class SignUp : ComponentActivity() {
                             passwordError = "";
                             confirmError = "";
                             cause = ErrorCause.none;
+                            isLoading = true;
                             SignUpRepository().signUp(
                                 userName = userName,
                                 email = email,
                                 password = password,
                                 confirmPassword = confirmPassword,
                                 onValidatorError = { message, errorCause ->
+                                    isLoading = false;
                                     cause = errorCause;
                                     when (cause) {
                                         ErrorCause.userName -> userNameError = message;
@@ -142,9 +149,11 @@ class SignUp : ComponentActivity() {
                                     }
                                 },
                                 onSuccess = {
+
                                     SignUpRepository().sendVerificationEmail(
                                         user = it,
                                         onFailure = {
+                                            isLoading = false;
                                             Toast.makeText(
                                                 context,
                                                 "Failed to send email",
@@ -152,6 +161,7 @@ class SignUp : ComponentActivity() {
                                             ).show()
                                         },
                                         onSuccess = {
+                                            isLoading = false;
                                             Toast.makeText(
                                                 context,
                                                 "Email Sent",
@@ -168,6 +178,7 @@ class SignUp : ComponentActivity() {
                                     );
                                 },
                                 onFailure = {
+                                    isLoading = false;
                                     Toast.makeText(
                                         context,
                                         it,
