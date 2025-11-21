@@ -15,7 +15,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
@@ -196,7 +195,7 @@ fun AnimeListItem() {
                     .fillMaxHeight()
             ) {
                 AsyncImage(
-                    model = "",
+                    model = "https://cdn.myanimelist.net/images/anime/10/47347.jpg",
                     contentDescription = "Attack on Titan",
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop,
