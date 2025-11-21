@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-<uses-permission android:name="android.permission.POST_NOTIFICATIONS"
-    android:minSdkVersion="33"/>
+
+    <uses-permission
+        android:name="android.permission.POST_NOTIFICATIONS"
+        android:minSdkVersion="33" />
 
     <application
         android:allowBackup="true"
@@ -13,6 +15,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AnimBro">
+        <activity
+            android:name=".AnimeList"
+            android:exported="false"
+            android:label="@string/title_activity_anime_list"
+            android:theme="@style/Theme.AnimBro" />
         <activity
             android:name=".auth.screens.VerifyEmailSent"
             android:exported="false"
@@ -28,14 +35,6 @@
             android:exported="false"
             android:label="@string/title_activity_sign_up"
             android:theme="@style/Theme.AnimBro" />
-        <activity
-            android:name=".auth.screen.SignUp"
-            android:exported="false"
-            android:label="@string/title_activity_sign_up"
-            android:theme="@style/Theme.AnimBro" />
-        <activity
-            android:name=".screens.SignUp"
-            android:exported="false" />
         <activity
             android:name=".MainActivity"
             android:exported="true"

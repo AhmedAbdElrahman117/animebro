@@ -67,7 +67,7 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
-
+    implementation("io.coil-kt:coil-compose:2.5.0")
     implementation("com.squareup.retrofit2:retrofit:3.0.0")
     implementation("com.squareup.retrofit2:converter-moshi:3.0.0")
     implementation("com.squareup.retrofit2:converter-gson:3.0.0")
@@ -88,6 +88,7 @@ dependencies {
     implementation("androidx.room:room-ktx:2.8.4")
     kapt("androidx.room:room-compiler:2.8.4")
     implementation("androidx.datastore:datastore-preferences:1.0.0")
+    implementation("androidx.compose.foundation:foundation:1.6.0") // For HorizontalPager
 
     testImplementation("io.mockk:mockk:1.13.5")
 
