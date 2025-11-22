@@ -42,6 +42,7 @@ import com.example.animbro.data.remote.Endpoints
 import com.example.animbro.repositories.AnimeRepositoryImp
 import com.example.animbro.ui.theme.AnimBroTheme
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.animbro.banner.Banner
 import com.example.animbro.data.remote.AuthInterceptor
 import com.example.animbro.data.remote.BASE_URL
 
@@ -142,7 +143,6 @@ fun HomeScreen(
                 ),
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
-                // Featured/Banner section - using first trending anime
                 item {
                     if (uiState.trendingAnime.isNotEmpty()) {
                         val featuredAnime = uiState.trendingAnime.first()
@@ -385,7 +385,7 @@ fun PosterSection(
             .fillMaxWidth()
             .height(360.dp)
     ) {
-        // Background image
+
         AsyncImage(
             model = anime.image?.large ?: anime.image?.medium,
             contentDescription = anime.title,
@@ -410,7 +410,13 @@ fun PosterSection(
                     )
                 )
         )
-
+        Banner(
+            height = 24.dp,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 20.dp)
+                .align(Alignment.TopCenter)
+        )
         // Content
         Box(
             modifier = Modifier
