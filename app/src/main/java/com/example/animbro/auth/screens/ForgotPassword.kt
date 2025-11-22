@@ -19,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -45,11 +46,14 @@ class ForgotPassword : ComponentActivity() {
 
             val activity = LocalActivity.current;
             val context = LocalContext.current;
+            var isLoading by remember { mutableStateOf(false) }
 
             AnimBroTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    AuthBackground(modifier = Modifier.padding(innerPadding)) {
-
+                    AuthBackground(
+                        modifier = Modifier.padding(innerPadding),
+                        isLoading = isLoading
+                    ) {
                         Box(modifier = Modifier.fillMaxWidth()) {
                             Text(
                                 "Reset Password",
@@ -81,15 +85,18 @@ class ForgotPassword : ComponentActivity() {
                         ) {
                             cause = ErrorCause.none;
                             errorMessage = "";
+                            isLoading = true;
                             LoginRepository().sendResetPasswordEmail(
                                 email,
                                 onValidatorError = { message, errorCause ->
+                                    isLoading = false;
                                     cause = errorCause;
                                     if (cause == ErrorCause.email) {
                                         errorMessage = message;
                                     }
                                 },
                                 onSuccess = {
+                                    isLoading = false;
                                     activity!!.startActivity(
                                         Intent(
                                             context,
@@ -99,6 +106,7 @@ class ForgotPassword : ComponentActivity() {
                                     activity.finishAffinity();
                                 },
                                 onFailure = {
+                                    isLoading = false;
                                     Toast.makeText(context, "Failed", Toast.LENGTH_LONG).show()
                                 },
                             );

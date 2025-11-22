@@ -16,6 +16,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,6 +24,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -46,9 +48,9 @@ import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import com.example.animbro.anime.screens.HomeActivity
 import com.example.animbro.auth.AuthBackground
 import com.example.animbro.auth.CustomDivider
 import com.example.animbro.auth.EmailTextField
@@ -72,10 +74,11 @@ class MainActivity : ComponentActivity() {
             var passwordError by rememberSaveable { mutableStateOf("") };
             var cause by rememberSaveable { mutableStateOf(ErrorCause.none) };
             val context = LocalContext.current;
+            var isLoading by remember { mutableStateOf(false) }
 
             AnimBroTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    AuthBackground(Modifier.padding(innerPadding)) {
+                    AuthBackground(Modifier.padding(innerPadding), isLoading = isLoading) {
                         Text(
                             "Login",
                             modifier = Modifier
@@ -134,11 +137,13 @@ class MainActivity : ComponentActivity() {
                                 cause = ErrorCause.none;
                                 emailError = ""
                                 passwordError = ""
+                                isLoading = true;
                                 LoginRepository().login(
                                     email,
                                     password,
                                     { message, errorCause ->
                                         cause = errorCause;
+                                        isLoading = false;
                                         when (errorCause) {
                                             ErrorCause.email -> {
                                                 emailError = message;
@@ -154,19 +159,20 @@ class MainActivity : ComponentActivity() {
                                         }
                                     },
                                     {
+                                        isLoading = false;
                                         Toast.makeText(context, "Success", Toast.LENGTH_LONG).show()
-                                        context.startActivity(Intent(context, HomeActivity::class.java))
-                                        finish()
 
                                     },
                                     {
+                                        isLoading = false;
                                         Toast.makeText(
                                             context,
                                             it,
                                             Toast.LENGTH_LONG
                                         ).show()
                                     },
-                                )
+                                );
+
                             },
                         )
                         CustomDivider()
@@ -190,50 +196,53 @@ class MainActivity : ComponentActivity() {
         }
 
     }
+
     private fun notificationHanlder(): ActivityResultLauncher<String> {
-        val handler = registerForActivityResult(ActivityResultContracts.RequestPermission()){
-            if(it){
-            sendNotificationMain()
-            }
-            else{
+        val handler = registerForActivityResult(ActivityResultContracts.RequestPermission()) {
+            if (it) {
+                sendNotificationMain()
+            } else {
 
             }
         }
         return handler
     }
-    private fun notificationChannel(){
-        val channel = NotificationChannel("30","Notifications", NotificationManager.IMPORTANCE_DEFAULT)
+
+    private fun notificationChannel() {
+        val channel =
+            NotificationChannel("30", "Notifications", NotificationManager.IMPORTANCE_DEFAULT)
         channel.description = "Main Notifications"
-       val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         manager.createNotificationChannel(channel)
     }
+
     @SuppressLint("MissingPermission")
-    private fun sendNotificationMain(){
-        val bitmap= BitmapFactory.decodeResource(resources,R.drawable.animebro_logo)
-        val builder = NotificationCompat.Builder(this,"30")
+    private fun sendNotificationMain() {
+        val bitmap = BitmapFactory.decodeResource(resources, R.drawable.animebro_logo)
+        val builder = NotificationCompat.Builder(this, "30")
         //val i = Intent(this,AnyActivity::class.java)
         //intent to open the desired (home or favourite etc..)
 //        val pendingintent = PendingIntent.getActivity(this
 //            ,90
 //            ,i
 //            , PendingIntent.FLAG_MUTABLE)
-        builder.
-                setSmallIcon(R.drawable.animebro_logo)
+        builder.setSmallIcon(R.drawable.animebro_logo)
             .setContentTitle("What's New")
             .setContentText("See if something came up !!")
             .setAutoCancel(true)
             .setStyle(NotificationCompat.BigPictureStyle().bigPicture(bitmap))
         NotificationManagerCompat
             .from(this)
-            .notify(10,builder.build())
+            .notify(10, builder.build())
     }
 
     override fun onStart() {
-        super.onStart()
-
         if (FirebaseAuth.getInstance().currentUser != null) {
-            startActivity(Intent(this, HomeActivity::class.java))
-            finish()
+            // TODO add intent to the page you want to open if user Logged in
+            // startActivity(Intent(this, SignUp::class.java))
+            super.onStart()
+        } else {
+            super.onStart()
         }
     }
 }
