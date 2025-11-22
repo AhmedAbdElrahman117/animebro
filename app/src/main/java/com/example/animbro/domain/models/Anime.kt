@@ -26,3 +26,14 @@ data class Anime(
     val pictures: List<MainPictureDTO>? = emptyList(),
     val isFavourite: Boolean = false
 )
+data class AnimeItem(
+    val id: Int,
+    val title: String,
+    val imageRes: Int,
+    val index: Int
+)
+
+data class AnimeSection(
+    val title: String,
+    val items: List<AnimeItem>
+)

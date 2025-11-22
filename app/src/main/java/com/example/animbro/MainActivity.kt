@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import com.example.animbro.anime.screens.HomeActivity
 import com.example.animbro.auth.AuthBackground
 import com.example.animbro.auth.CustomDivider
 import com.example.animbro.auth.EmailTextField
@@ -154,6 +155,9 @@ class MainActivity : ComponentActivity() {
                                     },
                                     {
                                         Toast.makeText(context, "Success", Toast.LENGTH_LONG).show()
+                                        context.startActivity(Intent(context, HomeActivity::class.java))
+                                        finish()
+
                                     },
                                     {
                                         Toast.makeText(
@@ -225,12 +229,11 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onStart() {
+        super.onStart()
+
         if (FirebaseAuth.getInstance().currentUser != null) {
-            // TODO add intent to the page you want to open if user Logged in
-            // startActivity(Intent(this, SignUp::class.java))
-            super.onStart()
-        } else {
-            super.onStart()
+            startActivity(Intent(this, HomeActivity::class.java))
+            finish()
         }
     }
 }
