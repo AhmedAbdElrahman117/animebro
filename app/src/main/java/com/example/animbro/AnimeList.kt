@@ -9,6 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
@@ -33,6 +34,16 @@ import coil.compose.AsyncImage
 import com.example.animbro.ui.theme.AnimBroTheme
 import kotlinx.coroutines.launch
 
+// Data class for anime items
+data class AnimeItem(
+    val id: Int,
+    val title: String,
+    val episodes: Int,
+    val type: String,
+    val rating: Float,
+    val imageUrl: String
+)
+
 class AnimeList : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,9 +58,9 @@ class AnimeList : ComponentActivity() {
 
 @Composable
 fun UserListScreen() {
-    val tabs = listOf("All", "Watching", "Completed", "Dropped", "Pending")
+    val tabs = listOf("Watching", "Completed", "Dropped", "Pending")
     val pagerState = rememberPagerState(
-        initialPage = 1, // Start at "Watching"
+        initialPage = 1,
         pageCount = { tabs.size }
     )
     val coroutineScope = rememberCoroutineScope()
@@ -57,13 +68,12 @@ fun UserListScreen() {
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
-        // Background Image
+        // Background Image - Painter resource must be called directly
         Image(
             painter = painterResource(id = R.drawable.background),
             contentDescription = "Background",
             modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop,
-//            alpha = 0.3f
+            contentScale = ContentScale.Crop
         )
 
         Box(
@@ -83,7 +93,7 @@ fun UserListScreen() {
                 ScrollableTabRow(
                     selectedTabIndex = pagerState.currentPage,
                     containerColor = Color.Transparent,
-                    contentColor = Color.White,
+                    contentColor = Color.Black,
                     edgePadding = 16.dp,
                     indicator = { tabPositions ->
                         TabRowDefaults.SecondaryIndicator(
@@ -104,7 +114,8 @@ fun UserListScreen() {
                                 Text(
                                     text = tab,
                                     fontSize = 14.sp,
-                                    fontWeight = if (pagerState.currentPage == index) FontWeight.Bold else FontWeight.Normal
+                                    fontWeight = if (pagerState.currentPage == index) FontWeight.Bold else FontWeight.Normal,
+                                    color = Color.Black
                                 )
                             }
                         )
@@ -116,7 +127,10 @@ fun UserListScreen() {
                     state = pagerState,
                     modifier = Modifier.fillMaxSize()
                 ) { page ->
-                    AnimeListPage(tabName = tabs[page])
+                    // Only load data for current page
+                    key(page) {
+                        AnimeListPage(tabName = tabs[page])
+                    }
                 }
             }
         }
@@ -125,12 +139,29 @@ fun UserListScreen() {
 
 @Composable
 fun AnimeListPage(tabName: String) {
+    // Sample data - replace with actual data source
+    val animeList = remember(tabName) {
+        List(18) { index ->
+            AnimeItem(
+                id = index + tabName.hashCode(), // Unique ID per tab
+                title = "Attack on Titan",
+                episodes = 25,
+                type = "TV",
+                rating = 8.5f,
+                imageUrl = "https://cdn.myanimelist.net/images/anime/10/47347.jpg"
+            )
+        }
+    }
+
     LazyColumn(
         contentPadding = PaddingValues(8.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        items(18) { index ->
-            AnimeListItem()
+        items(
+            items = animeList,
+            key = { anime -> anime.id }
+        ) { anime ->
+            AnimeListItem(anime = anime)
         }
     }
 }
@@ -140,8 +171,6 @@ fun UserHeader() {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.Black.copy(alpha = 0.3f))
-            .clickable { /* TODO: Navigate to profile */ }
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
@@ -165,6 +194,7 @@ fun UserHeader() {
                 painter = painterResource(id = R.drawable.acc_ic),
                 contentDescription = "Profile",
                 modifier = Modifier
+                    .clickable { /* TODO: Navigate to profile */ }
                     .size(50.dp)
                     .clip(CircleShape),
                 contentScale = ContentScale.Crop
@@ -174,12 +204,12 @@ fun UserHeader() {
 }
 
 @Composable
-fun AnimeListItem() {
+fun AnimeListItem(anime: AnimeItem) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .height(120.dp)
-            .clickable { },
+            .clickable { /* TODO: make it go to the anime details*/},
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
@@ -195,11 +225,12 @@ fun AnimeListItem() {
                     .fillMaxHeight()
             ) {
                 AsyncImage(
-                    model = "https://cdn.myanimelist.net/images/anime/10/47347.jpg",
-                    contentDescription = "Attack on Titan",
+                    model = anime.imageUrl,
+                    contentDescription = anime.title,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop,
-                    placeholder = painterResource(id = R.drawable.poster_sample)
+                    placeholder = painterResource(id = R.drawable.poster_sample),
+                    error = painterResource(id = R.drawable.poster_sample)
                 )
             }
 
@@ -213,7 +244,7 @@ fun AnimeListItem() {
             ) {
                 // Title
                 Text(
-                    text = "Attack on Titan",
+                    text = anime.title,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.Black,
@@ -229,7 +260,7 @@ fun AnimeListItem() {
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Text(
-                            text = "Episodes: 25",
+                            text = "Episodes: ${anime.episodes}",
                             fontSize = 12.sp,
                             color = Color.Gray
                         )
@@ -239,7 +270,7 @@ fun AnimeListItem() {
                             color = Color.Gray
                         )
                         Text(
-                            text = "TV",
+                            text = anime.type,
                             fontSize = 12.sp,
                             color = Color.Gray
                         )
@@ -257,7 +288,7 @@ fun AnimeListItem() {
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            text = "8.5",
+                            text = anime.rating.toString(),
                             fontSize = 13.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = Color.Black
@@ -278,6 +309,8 @@ fun AnimeListItem() {
                     contentDescription = "Edit Status",
                     tint = Color(0xFF4A5BFF),
                     modifier = Modifier.size(24.dp)
+
+
                 )
             }
         }
