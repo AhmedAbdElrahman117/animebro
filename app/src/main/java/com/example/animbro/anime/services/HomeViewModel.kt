@@ -1,4 +1,4 @@
-package com.example.animbro.anime.screens
+package com.example.animbro.anime.services
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -32,7 +32,6 @@ class HomeViewModel(
     fun loadAllAnimeData() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
-
             try {
                 val trendingDeferred = launch { loadTrendingAnime() }
                 val topRankedDeferred = launch { loadTopRankedAnime() }

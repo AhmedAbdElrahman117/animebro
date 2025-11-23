@@ -1,4 +1,6 @@
 package com.example.animbro.anime.screens
+
+import android.content.Intent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -42,11 +44,11 @@ import com.example.animbro.data.remote.Endpoints
 import com.example.animbro.repositories.AnimeRepositoryImp
 import com.example.animbro.ui.theme.AnimBroTheme
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.animbro.anime.services.HomeViewModel
+import com.example.animbro.anime.services.HomeViewModelFactory
 import com.example.animbro.banner.Banner
 import com.example.animbro.data.remote.AuthInterceptor
 import com.example.animbro.data.remote.BASE_URL
-
-
 class HomeActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -71,7 +73,7 @@ class HomeActivity : ComponentActivity() {
                         viewModel = viewModel,
                         screenPadding = 20.dp,
                         onAnimeClick = { animeId ->
-                            // TODO: Navigate to anime details screen
+                            navigateToDetail(animeId)
                         },
                         onMoreClick = { section ->
                             // TODO: Navigate to section list screen
@@ -82,6 +84,12 @@ class HomeActivity : ComponentActivity() {
         }
     }
 
+    private fun navigateToDetail(animeId: Int) {
+        val intent = Intent(this, DetailActivity::class.java).apply {
+            putExtra("animeId", animeId)
+        }
+        startActivity(intent)
+    }
     private fun getApiInstance(): Endpoints {
 
         val logging = okhttp3.logging.HttpLoggingInterceptor().apply {
