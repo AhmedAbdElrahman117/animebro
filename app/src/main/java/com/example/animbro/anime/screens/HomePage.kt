@@ -49,6 +49,12 @@ import com.example.animbro.anime.services.HomeViewModelFactory
 import com.example.animbro.banner.Banner
 import com.example.animbro.data.remote.AuthInterceptor
 import com.example.animbro.data.remote.BASE_URL
+import androidx.compose.material.icons.Icons
+import androidx.compose.ui.draw.clip
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.ui.platform.LocalContext
+import android.inputmethodservice.Keyboard.Row
+
 class HomeActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -161,6 +167,27 @@ fun HomeScreen(
                         )
                     }
                 }
+                item {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp, vertical = 12.dp),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        val context = LocalContext.current
+                        Column(modifier = Modifier.padding(1.dp)) {
+                            SearchBar(
+                                onClick = {
+                                    context.startActivity(
+                                        Intent(context, SearchActivity::class.java)
+                                    )
+                                }
+                            )
+                            Spacer(modifier = Modifier.height(1.dp))
+                        }
+                    }
+                }
+
 
                 // Trending Section
                 item {
@@ -598,3 +625,34 @@ fun AnimeCard(
         }
     }
 }
+@Composable
+fun SearchBar(onClick: () -> Unit) {
+    val darkBlue = Color(0xFF0A3D62)
+
+    Box(
+        modifier = Modifier
+            .width(350.dp)
+            .height(60.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(Color.White)
+            .clickable { onClick() }
+            .padding(horizontal = 12.dp),
+        contentAlignment = Alignment.CenterStart
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = Icons.Default.Search,
+                contentDescription = null,
+                tint = darkBlue
+            )
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Text(
+                text = "                      Search…",
+                color = Color.Gray
+            )
+        }
+    }
+}
+

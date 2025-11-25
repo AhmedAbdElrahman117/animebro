@@ -52,6 +52,9 @@
         <activity
             android:name="com.example.animbro.anime.screens.DetailActivity"
             android:exported="false" />
+        <activity
+            android:name=".anime.screens.SearchActivity"
+            android:exported="true" />
     </application>
 
 </manifest>
