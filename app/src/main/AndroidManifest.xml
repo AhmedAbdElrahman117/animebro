@@ -16,7 +16,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AnimBro">
         <activity
-            android:name=".AnimeList"
+            android:name=".anime.screens.AnimeList"
             android:exported="false"
             android:label="@string/title_activity_anime_list"
             android:theme="@style/Theme.AnimBro" />

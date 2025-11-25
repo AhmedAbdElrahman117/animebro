@@ -1,4 +1,4 @@
-package com.example.animbro
+package com.example.animbro.anime.screens
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -31,18 +31,18 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.example.animbro.R
 import com.example.animbro.ui.theme.AnimBroTheme
 import kotlinx.coroutines.launch
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.animbro.anime.services.AnimeListViewModel
+import com.example.animbro.anime.services.AnimeListViewModelFactory
+import com.example.animbro.data.local.dao.WatchListDAO
+import com.example.animbro.data.remote.Endpoints
+import com.example.animbro.repositories.AnimeRepositoryImp
+import com.example.animbro.domain.models.Anime
 
-// Data class for anime items
-data class AnimeItem(
-    val id: Int,
-    val title: String,
-    val episodes: Int,
-    val type: String,
-    val rating: Float,
-    val imageUrl: String
-)
+
 
 class AnimeList : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,14 +50,50 @@ class AnimeList : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             AnimBroTheme {
-                UserListScreen()
+                val repository = remember {
+                    val api: Endpoints = getApiInstance()
+                    val dao: WatchListDAO = getDaoInstance()
+                    AnimeRepositoryImp(api, dao)
+                }
+
+                val viewModel: AnimeListViewModel = viewModel(
+                    factory = AnimeListViewModelFactory(repository)
+                )
+
+                UserListScreen(viewModel)
             }
         }
+    }
+
+    private fun getApiInstance(): Endpoints {
+        val logging = okhttp3.logging.HttpLoggingInterceptor().apply {
+            level = okhttp3.logging.HttpLoggingInterceptor.Level.BODY
+        }
+
+        val retrofit = retrofit2.Retrofit.Builder()
+            .baseUrl(com.example.animbro.data.remote.BASE_URL)
+            .addConverterFactory(retrofit2.converter.gson.GsonConverterFactory.create(com.google.gson.Gson()))
+            .build()
+
+        return retrofit.create(Endpoints::class.java)
+    }
+
+    private fun getDaoInstance(): WatchListDAO {
+        val db = androidx.room.Room
+            .databaseBuilder(
+                this,
+                com.example.animbro.data.local.AppDatabase::class.java,
+                "animbro_db"
+            )
+            .fallbackToDestructiveMigration()
+            .build()
+
+        return db.watchListDao()
     }
 }
 
 @Composable
-fun UserListScreen() {
+fun UserListScreen(viewModel: AnimeListViewModel) {
     val tabs = listOf("Watching", "Completed", "Dropped", "Pending")
     val pagerState = rememberPagerState(
         initialPage = 1,
@@ -76,61 +112,56 @@ fun UserListScreen() {
             contentScale = ContentScale.Crop
         )
 
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(Color.White.copy(alpha = 0.5f))
+        Column(
+            modifier = Modifier.fillMaxSize()
         ) {
-            Column(
-                modifier = Modifier.fillMaxSize()
-            ) {
-                // Header with user info
-                UserHeader()
+            // Header with user info
+            UserHeader()
 
-                // Status Tabs
-                ScrollableTabRow(
-                    selectedTabIndex = pagerState.currentPage,
-                    containerColor = Color.Transparent,
-                    contentColor = Color.Black,
-                    edgePadding = 16.dp,
-                    indicator = { tabPositions ->
-                        TabRowDefaults.SecondaryIndicator(
-                            Modifier.tabIndicatorOffset(tabPositions[pagerState.currentPage]),
-                            color = Color(0xFF4A5BFF)
-                        )
-                    }
-                ) {
-                    tabs.forEachIndexed { index, tab ->
-                        Tab(
-                            selected = pagerState.currentPage == index,
-                            onClick = {
-                                coroutineScope.launch {
-                                    pagerState.animateScrollToPage(index)
-                                }
-                            },
-                            text = {
-                                Text(
-                                    text = tab,
-                                    fontSize = 14.sp,
-                                    fontWeight = if (pagerState.currentPage == index) FontWeight.Bold else FontWeight.Normal,
-                                    color = Color.Black
-                                )
-                            }
-                        )
-                    }
+            // Status Tabs
+            ScrollableTabRow(
+                selectedTabIndex = pagerState.currentPage,
+                containerColor = Color.Transparent,
+                contentColor = Color.Black,
+                edgePadding = 16.dp,
+                indicator = { tabPositions ->
+                    TabRowDefaults.SecondaryIndicator(
+                        Modifier.tabIndicatorOffset(tabPositions[pagerState.currentPage]),
+                        color = Color(0xFF4A5BFF)
+                    )
                 }
+            ) {
+                tabs.forEachIndexed { index, tab ->
+                    Tab(
+                        selected = pagerState.currentPage == index,
+                        onClick = {
+                            coroutineScope.launch {
+                                pagerState.animateScrollToPage(index)
+                            }
+                        },
+                        text = {
+                            Text(
+                                text = tab,
+                                fontSize = 14.sp,
+                                fontWeight = if (pagerState.currentPage == index) FontWeight.Bold else FontWeight.Normal,
+                                color = Color.Black
+                            )
+                        }
+                    )
+                }
+            }
 
-                // Horizontal Pager for swipeable content
-                HorizontalPager(
-                    state = pagerState,
-                    modifier = Modifier.fillMaxSize()
-                ) { page ->
-                    // Only load data for current page
-                    key(page) {
-                        AnimeListPage(tabName = tabs[page])
-                    }
+            // Horizontal Pager for swipeable content
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.fillMaxSize()
+            ) { page ->
+                val tabName = tabs[page]
+                val animeList by viewModel.getListByCategory(tabName).collectAsState()
+
+                // Only load data for current page
+                key(page) {
+                    AnimeListPage(animeList = animeList)
                 }
             }
         }
@@ -138,20 +169,11 @@ fun UserListScreen() {
 }
 
 @Composable
-fun AnimeListPage(tabName: String) {
-    // Sample data - replace with actual data source
-    val animeList = remember(tabName) {
-        List(18) { index ->
-            AnimeItem(
-                id = index + tabName.hashCode(), // Unique ID per tab
-                title = "Attack on Titan",
-                episodes = 25,
-                type = "TV",
-                rating = 8.5f,
-                imageUrl = "https://cdn.myanimelist.net/images/anime/10/47347.jpg"
-            )
-        }
-    }
+fun AnimeListPage(animeList: List<Anime>) {
+    // Hoist painter resources to avoid repeated lookups
+    val placeholderPainter = painterResource(id = R.drawable.poster_sample)
+    val errorPainter = painterResource(id = R.drawable.poster_sample)
+    val savedIconPainter = painterResource(id = R.drawable.saved_ic)
 
     LazyColumn(
         contentPadding = PaddingValues(8.dp),
@@ -161,7 +183,12 @@ fun AnimeListPage(tabName: String) {
             items = animeList,
             key = { anime -> anime.id }
         ) { anime ->
-            AnimeListItem(anime = anime)
+            AnimeListItem(
+                anime = anime,
+                placeholderPainter = placeholderPainter,
+                errorPainter = errorPainter,
+                savedIconPainter = savedIconPainter
+            )
         }
     }
 }
@@ -204,7 +231,12 @@ fun UserHeader() {
 }
 
 @Composable
-fun AnimeListItem(anime: AnimeItem) {
+fun AnimeListItem(
+    anime: Anime,
+    placeholderPainter: androidx.compose.ui.graphics.painter.Painter,
+    errorPainter: androidx.compose.ui.graphics.painter.Painter,
+    savedIconPainter: androidx.compose.ui.graphics.painter.Painter
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -225,12 +257,12 @@ fun AnimeListItem(anime: AnimeItem) {
                     .fillMaxHeight()
             ) {
                 AsyncImage(
-                    model = anime.imageUrl,
+                    model = anime.image?.large ?: anime.image?.medium,
                     contentDescription = anime.title,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop,
-                    placeholder = painterResource(id = R.drawable.poster_sample),
-                    error = painterResource(id = R.drawable.poster_sample)
+                    placeholder = placeholderPainter,
+                    error = errorPainter
                 )
             }
 
@@ -270,7 +302,7 @@ fun AnimeListItem(anime: AnimeItem) {
                             color = Color.Gray
                         )
                         Text(
-                            text = anime.type,
+                            text = anime.status, // Using status instead of type
                             fontSize = 12.sp,
                             color = Color.Gray
                         )
@@ -288,7 +320,7 @@ fun AnimeListItem(anime: AnimeItem) {
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            text = anime.rating.toString(),
+                            text = if (anime.score > 0) (anime.score / 10.0).toString() else "N/A",
                             fontSize = 13.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = Color.Black
@@ -305,7 +337,7 @@ fun AnimeListItem(anime: AnimeItem) {
                     .padding(end = 8.dp)
             ) {
                 Icon(
-                    painter = painterResource(id = R.drawable.saved_ic),
+                    painter = savedIconPainter,
                     contentDescription = "Edit Status",
                     tint = Color(0xFF4A5BFF),
                     modifier = Modifier.size(24.dp)
@@ -321,6 +353,32 @@ fun AnimeListItem(anime: AnimeItem) {
 @Composable
 fun UserListScreenPreview() {
     AnimBroTheme {
-        UserListScreen()
+        UserListScreen(viewModel = PreviewAnimeListViewModel())
     }
+}
+
+private fun PreviewAnimeListViewModel(): AnimeListViewModel {
+    val mockRepository = object : com.example.animbro.domain.repository.AnimeRepository {
+        override suspend fun getTopRatedAnime(limit: Int) = emptyList<Anime>()
+        override suspend fun getPopularAnime(limit: Int) = emptyList<Anime>()
+        override suspend fun getUpcomingAnime(limit: Int) = emptyList<Anime>()
+        override suspend fun getFavouritesAnime(limit: Int) = emptyList<Anime>()
+        override suspend fun searchAnime(query: String) = emptyList<Anime>()
+        override suspend fun getAnimeDetails(id: Int) = null
+        override fun getWatchListByCategory(category: String) = kotlinx.coroutines.flow.MutableStateFlow(
+            List(5) {
+                Anime(
+                    id = it,
+                    title = "Sample Anime $it",
+                    image = null,
+                    episodes = 12,
+                    status = "TV",
+                    score = 85
+                )
+            }
+        )
+        override suspend fun addToWatchList(anime: Anime, category: String) {}
+        override suspend fun removeFromWatchList(id: Int) {}
+    }
+    return AnimeListViewModel(mockRepository)
 }

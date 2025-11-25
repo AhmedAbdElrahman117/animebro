@@ -1,0 +1,93 @@
+Index: app/src/main/java/com/example/animbro/AnimeList.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/animbro/AnimeList.kt b/app/src/main/java/com/example/animbro/anime/screens/AnimeList.kt
+rename from app/src/main/java/com/example/animbro/AnimeList.kt
+rename to app/src/main/java/com/example/animbro/anime/screens/AnimeList.kt
+--- a/app/src/main/java/com/example/animbro/AnimeList.kt	(revision 01e9ac2d162cd51055e08d09f8174fb2a7e80c75)
++++ b/app/src/main/java/com/example/animbro/anime/screens/AnimeList.kt	(date 1763856045512)
+@@ -1,4 +1,4 @@
+-package com.example.animbro
++package com.example.animbro.anime.screens
+ 
+ import android.os.Bundle
+ import androidx.activity.ComponentActivity
+@@ -31,6 +31,7 @@
+ import androidx.compose.ui.unit.dp
+ import androidx.compose.ui.unit.sp
+ import coil.compose.AsyncImage
++import com.example.animbro.R
+ import com.example.animbro.ui.theme.AnimBroTheme
+ import kotlinx.coroutines.launch
+ 
+Index: .idea/studiobot.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/studiobot.xml b/.idea/studiobot.xml
+new file mode 100644
+--- /dev/null	(date 1763855214784)
++++ b/.idea/studiobot.xml	(date 1763855214784)
+@@ -0,0 +1,6 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="StudioBotProjectSettings">
++    <option name="shareContext" value="OptedOut" />
++  </component>
++</project>
+\ No newline at end of file
+Index: .idea/deploymentTargetSelector.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<project version=\"4\">\n  <component name=\"deploymentTargetSelector\">\n    <selectionStates>\n      <SelectionState runConfigName=\"app\">\n        <option name=\"selectionMode\" value=\"DROPDOWN\" />\n        <DropdownSelection timestamp=\"2025-11-18T22:21:08.004066200Z\">\n          <Target type=\"DEFAULT_BOOT\">\n            <handle>\n              <DeviceId pluginId=\"LocalEmulator\" identifier=\"path=C:\\Users\\InvalidHamdy\\.android\\avd\\Medium_Phone.avd\" />\n            </handle>\n          </Target>\n        </DropdownSelection>\n        <DialogSelection />\n      </SelectionState>\n      <SelectionState runConfigName=\"UserListScreenPreview\">\n        <option name=\"selectionMode\" value=\"DROPDOWN\" />\n      </SelectionState>\n    </selectionStates>\n  </component>\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/deploymentTargetSelector.xml b/.idea/deploymentTargetSelector.xml
+--- a/.idea/deploymentTargetSelector.xml	(revision 01e9ac2d162cd51055e08d09f8174fb2a7e80c75)
++++ b/.idea/deploymentTargetSelector.xml	(date 1763852349662)
+@@ -13,9 +13,6 @@
+         </DropdownSelection>
+         <DialogSelection />
+       </SelectionState>
+-      <SelectionState runConfigName="UserListScreenPreview">
+-        <option name="selectionMode" value="DROPDOWN" />
+-      </SelectionState>
+     </selectionStates>
+   </component>
+ </project>
+\ No newline at end of file
+Index: .idea/.name
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/.name b/.idea/.name
+new file mode 100644
+--- /dev/null	(date 1763851914277)
++++ b/.idea/.name	(date 1763851914277)
+@@ -0,0 +1,1 @@
++AnimBro
+\ No newline at end of file
+Index: app/src/main/AndroidManifest.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?>\n<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\"\n    xmlns:tools=\"http://schemas.android.com/tools\">\n\n    <uses-permission\n        android:name=\"android.permission.POST_NOTIFICATIONS\"\n        android:minSdkVersion=\"33\" />\n\n    <application\n        android:allowBackup=\"true\"\n        android:dataExtractionRules=\"@xml/data_extraction_rules\"\n        android:fullBackupContent=\"@xml/backup_rules\"\n        android:icon=\"@mipmap/ic_launcher\"\n        android:label=\"@string/app_name\"\n        android:roundIcon=\"@mipmap/ic_launcher_round\"\n        android:supportsRtl=\"true\"\n        android:theme=\"@style/Theme.AnimBro\">\n        <activity\n            android:name=\".AnimeList\"\n            android:exported=\"false\"\n            android:label=\"@string/title_activity_anime_list\"\n            android:theme=\"@style/Theme.AnimBro\" />\n        <activity\n            android:name=\".auth.screens.VerifyEmailSent\"\n            android:exported=\"false\"\n            android:label=\"@string/title_activity_verify_email_sent\"\n            android:theme=\"@style/Theme.AnimBro\" />\n        <activity\n            android:name=\".auth.screens.ForgotPassword\"\n            android:exported=\"false\"\n            android:label=\"@string/title_activity_forgot_password\"\n            android:theme=\"@style/Theme.AnimBro\" />\n        <activity\n            android:name=\".auth.screens.SignUp\"\n            android:exported=\"false\"\n            android:label=\"@string/title_activity_sign_up\"\n            android:theme=\"@style/Theme.AnimBro\" />\n        <activity\n            android:name=\".MainActivity\"\n            android:exported=\"true\"\n            android:label=\"@string/app_name\"\n            android:theme=\"@style/Theme.AnimBro\">\n            <intent-filter>\n                <action android:name=\"android.intent.action.MAIN\" />\n\n                <category android:name=\"android.intent.category.LAUNCHER\" />\n            </intent-filter>\n        </activity>\n        <activity\n            android:name=\".anime.screens.HomeActivity\"\n            android:exported=\"false\" />\n    </application>\n\n</manifest>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/AndroidManifest.xml b/app/src/main/AndroidManifest.xml
+--- a/app/src/main/AndroidManifest.xml	(revision 01e9ac2d162cd51055e08d09f8174fb2a7e80c75)
++++ b/app/src/main/AndroidManifest.xml	(date 1763856262048)
+@@ -16,7 +16,7 @@
+         android:supportsRtl="true"
+         android:theme="@style/Theme.AnimBro">
+         <activity
+-            android:name=".AnimeList"
++            android:name=".anime.screens.AnimeList"
+             android:exported="false"
+             android:label="@string/title_activity_anime_list"
+             android:theme="@style/Theme.AnimBro" />
