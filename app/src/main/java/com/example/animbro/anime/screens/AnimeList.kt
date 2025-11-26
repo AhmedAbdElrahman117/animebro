@@ -41,7 +41,7 @@ import com.example.animbro.data.local.dao.WatchListDAO
 import com.example.animbro.data.remote.Endpoints
 import com.example.animbro.repositories.AnimeRepositoryImp
 import com.example.animbro.domain.models.Anime
-
+import androidx.compose.ui.text.style.TextAlign
 
 
 class AnimeListActivity : ComponentActivity() {
@@ -113,21 +113,20 @@ fun UserListScreen(viewModel: AnimeListViewModel, modifier: Modifier = Modifier)
     Box(
         modifier = modifier.fillMaxSize()
     ) {
-
-
         // Background Image
-        Image(
-            painter = painterResource(id = R.drawable.background),
-            contentDescription = "Background",
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop
-        )
+//        Image(
+//            painter = painterResource(id = R.drawable.background),
+//            contentDescription = "Background",
+//            modifier = Modifier.fillMaxSize(),
+//            contentScale = ContentScale.Crop
+//        )
 
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
             // Header with user info
             UserHeader()
+
             // Status Tabs
             ScrollableTabRow(
                 selectedTabIndex = pagerState.currentPage,
@@ -171,7 +170,10 @@ fun UserListScreen(viewModel: AnimeListViewModel, modifier: Modifier = Modifier)
 
                 // Only load data for current page
                 key(page) {
-                    AnimeListPage(animeList = animeList)
+                    AnimeListPage(
+                        animeList = animeList,
+                        category = tabName
+                    )
                 }
             }
         }
@@ -179,26 +181,64 @@ fun UserListScreen(viewModel: AnimeListViewModel, modifier: Modifier = Modifier)
 }
 
 @Composable
-fun AnimeListPage(animeList: List<Anime>) {
+fun AnimeListPage(animeList: List<Anime>, category: String = "") {
     // Hoist painter resources to avoid repeated lookups
     val placeholderPainter = painterResource(id = R.drawable.poster_sample)
     val errorPainter = painterResource(id = R.drawable.poster_sample)
     val savedIconPainter = painterResource(id = R.drawable.saved_ic)
 
-    LazyColumn(
-        contentPadding = PaddingValues(8.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        items(
-            items = animeList,
-            key = { anime -> anime.id }
-        ) { anime ->
-            AnimeListItem(
-                anime = anime,
-                placeholderPainter = placeholderPainter,
-                errorPainter = errorPainter,
-                savedIconPainter = savedIconPainter
-            )
+    if (animeList.isEmpty()) {
+        // Empty State
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(32.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.saved_ic),
+                    contentDescription = "Empty List",
+                    modifier = Modifier.size(80.dp),
+                    tint = Color.Black
+                )
+                Text(
+                    text = "Nothing here yet!",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
+                Text(
+                    text = if (category.isNotEmpty()) {
+                        "Start adding anime to your $category list"
+                    } else {
+                        "Start adding anime to your list"
+                    },
+                    fontSize = 14.sp,
+                    color = Color.Black,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                )
+            }
+        }
+    } else {
+        LazyColumn(
+            contentPadding = PaddingValues(8.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(
+                items = animeList,
+                key = { anime -> anime.id }
+            ) { anime ->
+                AnimeListItem(
+                    anime = anime,
+                    placeholderPainter = placeholderPainter,
+                    errorPainter = errorPainter,
+                    savedIconPainter = savedIconPainter
+                )
+            }
         }
     }
 }
