@@ -46,13 +46,14 @@ import com.example.animbro.ui.theme.AnimBroTheme
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.animbro.anime.services.HomeViewModel
 import com.example.animbro.anime.services.HomeViewModelFactory
-import com.example.animbro.banner.Banner
+import com.example.animbro.anime.components.Banner
 import com.example.animbro.data.remote.AuthInterceptor
 import com.example.animbro.data.remote.BASE_URL
 import androidx.compose.material.icons.Icons
 import androidx.compose.ui.draw.clip
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.ui.platform.LocalContext
+import com.example.animbro.anime.components.BottomNavigationBar
 import android.inputmethodservice.Keyboard.Row
 import androidx.compose.runtime.LaunchedEffect
 
@@ -63,7 +64,12 @@ class HomeActivity : ComponentActivity() {
 
         setContent {
             AnimBroTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { paddingValues ->
+                Scaffold(
+                    bottomBar = {
+                BottomNavigationBar(currentRoute = "home")
+            }
+
+                ) { paddingValues ->
 
                     val repository = remember {
                         val api: Endpoints = getApiInstance()
@@ -75,17 +81,19 @@ class HomeActivity : ComponentActivity() {
                     val viewModel: HomeViewModel = viewModel(
                         factory = HomeViewModelFactory(repository)
                     )
-
+                Box(modifier = Modifier.padding(paddingValues)) {
                     HomeScreen(
-                        viewModel = viewModel,
-                        screenPadding = 20.dp,
-                        onAnimeClick = { animeId ->
-                            navigateToDetail(animeId)
-                        },
-                        onMoreClick = { section ->
-                            // TODO: Navigate to section list screen
-                        }
-                    )
+                            viewModel = viewModel,
+                            screenPadding = 20.dp,
+                            onAnimeClick = { animeId ->
+                                navigateToDetail(animeId)
+                            },
+                            onMoreClick = { section ->
+                                // TODO: Navigate to section list screen
+                            }
+                        )
+            }
+
                 }
             }
         }
@@ -188,28 +196,6 @@ fun HomeScreen(
                         )
                     }
                 }
-                item {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 20.dp, vertical = 12.dp),
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        val context = LocalContext.current
-                        Column(modifier = Modifier.padding(1.dp)) {
-                            SearchBar(
-                                onClick = {
-                                    context.startActivity(
-                                        Intent(context, SearchActivity::class.java)
-                                    )
-                                }
-                            )
-                            Spacer(modifier = Modifier.height(1.dp))
-                        }
-                    }
-                }
-
-
                 // Trending Section
                 item {
                     AnimeSection(

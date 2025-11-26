@@ -1,4 +1,4 @@
-package com.example.animbro.banner
+package com.example.animbro.anime.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -64,15 +64,7 @@ fun Banner(
                     .clickable { onSavedClick() },
                 contentScale = ContentScale.Fit
             )
-            Image(
-                painter = painterResource(id = R.drawable.acc_ic),
-                contentDescription = "Account",
-                modifier = Modifier
-                    .size(50.dp)
-                    .padding(2.dp)
-                    .clickable { onAccClick() },
-                contentScale = ContentScale.Fit
-            )
+
         }
     }
 }

@@ -38,11 +38,13 @@ import com.example.animbro.data.local.AppDatabase
 import com.example.animbro.data.remote.AuthInterceptor
 import com.example.animbro.data.remote.BASE_URL
 import com.example.animbro.data.remote.Endpoints
+import com.example.animbro.ui.theme.AnimBroTheme
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import androidx.compose.ui.res.painterResource
+import com.example.animbro.anime.components.BottomNavigationBar
 
 class SearchActivity : ComponentActivity() {
 
@@ -54,8 +56,17 @@ class SearchActivity : ComponentActivity() {
         val repository = AnimeRepositoryImp(api, dao)
 
         setContent {
-            MaterialTheme {
-                SearchScreen(viewModel = viewModel(factory = SearchViewModelFactory(repository)))
+            AnimBroTheme {
+                Scaffold(
+                    bottomBar = {
+                        BottomNavigationBar(currentRoute = "search")
+                    }
+                ) { paddingValues ->
+                    SearchScreen(
+                        viewModel = viewModel(factory = SearchViewModelFactory(repository)),
+                        modifier = Modifier.padding(paddingValues)
+                    )
+                }
             }
         }
     }
@@ -89,14 +100,14 @@ class SearchActivity : ComponentActivity() {
 }
 
 @Composable
-fun SearchScreen(viewModel: SearchViewModel) {
+fun SearchScreen(viewModel: SearchViewModel, modifier: Modifier = Modifier) {
     var query by remember { mutableStateOf("") }
     val results by viewModel.results.collectAsState()
     val darkBlue = Color(0xFF0A3D62)
     val context = LocalContext.current
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .background(Color(0xFFF0F0F0))
             .padding(16.dp)
@@ -139,17 +150,52 @@ fun SearchScreen(viewModel: SearchViewModel) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // عرض النتائج
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            modifier = Modifier.fillMaxSize()
-        ) {
-            items(results) { anime ->
-                AnimeResultCard(anime = anime, onClick = {
-                    val intent = android.content.Intent(context, DetailActivity::class.java)
-                    intent.putExtra("animeId", anime.id)
-                    context.startActivity(intent)
-                })
+        // Results List
+        if (results.isEmpty() && query.isNotEmpty()) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "No results found",
+                    color = Color.Gray,
+                    fontSize = 16.sp
+                )
+            }
+        } else if (query.isEmpty()) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "Search",
+                        modifier = Modifier.size(64.dp),
+                        tint = Color.Gray
+                    )
+                    Text(
+                        text = "Search for your favorite anime",
+                        color = Color.Gray,
+                        fontSize = 16.sp
+                    )
+                }
+            }
+        } else {
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.fillMaxSize()
+            ) {
+                items(results) { anime ->
+                    AnimeResultCard(anime = anime, onClick = {
+                        val intent = android.content.Intent(context, DetailActivity::class.java)
+                        intent.putExtra("animeId", anime.id)
+                        context.startActivity(intent)
+                    })
+                }
             }
         }
     }
@@ -184,6 +230,7 @@ fun AnimeResultCard(anime: Anime, onClick: () -> Unit) {
             Column(
                 modifier = Modifier
                     .fillMaxHeight()
+                    .weight(1f)
                     .padding(vertical = 4.dp),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
@@ -191,17 +238,25 @@ fun AnimeResultCard(anime: Anime, onClick: () -> Unit) {
                     text = anime.title,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    color = Color(0xFF0A3D62)
                 )
 
-                Text(
-                    text = anime.description ?: "No description available",
-                    fontSize = 13.sp,
-                    maxLines = 3,
-                    overflow = TextOverflow.Ellipsis,
-                    color = Color.Gray
-                )
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                ) {
+                    Text(
+                        text = "Episodes: ${anime.episodes ?: "N/A"}",
+                        fontSize = 12.sp,
+                        color = Color.Gray
+                    )
+                    Text(
+                        text = "Score: ${if (anime.score > 0) anime.score else "N/A"}",
+                        fontSize = 12.sp,
+                        color = Color.Gray
+                    )
+                }
             }
         }
     }
