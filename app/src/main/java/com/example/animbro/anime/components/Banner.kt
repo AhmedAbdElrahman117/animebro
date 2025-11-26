@@ -1,4 +1,4 @@
-package com.example.animbro.banner
+package com.example.animbro.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
