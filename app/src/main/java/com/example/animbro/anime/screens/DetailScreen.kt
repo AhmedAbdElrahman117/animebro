@@ -3,12 +3,9 @@ package com.example.animbro.anime.screens
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
-import android.webkit.WebChromeClient
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -42,7 +39,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
-import com.example.animbro.banner.Banner
+import com.example.animbro.anime.components.Banner
 import com.example.animbro.data.local.dao.WatchListDAO
 import com.example.animbro.data.remote.Endpoints
 import com.example.animbro.domain.models.Anime

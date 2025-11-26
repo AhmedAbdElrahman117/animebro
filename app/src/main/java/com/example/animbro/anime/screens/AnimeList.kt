@@ -12,7 +12,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
@@ -21,7 +20,6 @@ import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -32,9 +30,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.animbro.R
+import com.example.animbro.anime.components.BottomNavigationBar
 import com.example.animbro.ui.theme.AnimBroTheme
 import kotlinx.coroutines.launch
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.animbro.anime.components.Banner
 import com.example.animbro.anime.services.AnimeListViewModel
 import com.example.animbro.anime.services.AnimeListViewModelFactory
 import com.example.animbro.data.local.dao.WatchListDAO
@@ -44,7 +44,7 @@ import com.example.animbro.domain.models.Anime
 
 
 
-class AnimeList : ComponentActivity() {
+class AnimeListActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -60,7 +60,16 @@ class AnimeList : ComponentActivity() {
                     factory = AnimeListViewModelFactory(repository)
                 )
 
-                UserListScreen(viewModel)
+                Scaffold(
+                    bottomBar = {
+                        BottomNavigationBar(currentRoute = "animelist")
+                    }
+                ) { paddingValues ->
+                    UserListScreen(
+                        viewModel = viewModel,
+                        modifier = Modifier.padding(paddingValues)
+                    )
+                }
             }
         }
     }
@@ -93,18 +102,20 @@ class AnimeList : ComponentActivity() {
 }
 
 @Composable
-fun UserListScreen(viewModel: AnimeListViewModel) {
+fun UserListScreen(viewModel: AnimeListViewModel, modifier: Modifier = Modifier) {
     val tabs = listOf("Watching", "Completed", "Dropped", "Pending")
     val pagerState = rememberPagerState(
-        initialPage = 1,
+        initialPage = 0,
         pageCount = { tabs.size }
     )
     val coroutineScope = rememberCoroutineScope()
 
     Box(
-        modifier = Modifier.fillMaxSize()
+        modifier = modifier.fillMaxSize()
     ) {
-        // Background Image - Painter resource must be called directly
+
+
+        // Background Image
         Image(
             painter = painterResource(id = R.drawable.background),
             contentDescription = "Background",
@@ -117,7 +128,6 @@ fun UserListScreen(viewModel: AnimeListViewModel) {
         ) {
             // Header with user info
             UserHeader()
-
             // Status Tabs
             ScrollableTabRow(
                 selectedTabIndex = pagerState.currentPage,
@@ -195,38 +205,20 @@ fun AnimeListPage(animeList: List<Anime>) {
 
 @Composable
 fun UserHeader() {
-    Row(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+            .padding(16.dp)
     ) {
         // App Logo
-        Image(
-            painter = painterResource(id = R.drawable.animebro_logo),
-            contentDescription = "AnimeBro Logo",
+        Banner(
+            height = 24.dp,
             modifier = Modifier
-                .height(60.dp)
-                .width(180.dp),
-            contentScale = ContentScale.Fit
+                .fillMaxWidth()
+                .padding(top = 20.dp)
+                .align(Alignment.TopCenter)
         )
 
-        // Profile Section
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Profile Image
-            Image(
-                painter = painterResource(id = R.drawable.acc_ic),
-                contentDescription = "Profile",
-                modifier = Modifier
-                    .clickable { /* TODO: Navigate to profile */ }
-                    .size(50.dp)
-                    .clip(CircleShape),
-                contentScale = ContentScale.Crop
-            )
-        }
     }
 }
 
@@ -302,7 +294,7 @@ fun AnimeListItem(
                             color = Color.Gray
                         )
                         Text(
-                            text = anime.status, // Using status instead of type
+                            text = anime.status,
                             fontSize = 12.sp,
                             color = Color.Gray
                         )
@@ -341,8 +333,6 @@ fun AnimeListItem(
                     contentDescription = "Edit Status",
                     tint = Color(0xFF4A5BFF),
                     modifier = Modifier.size(24.dp)
-
-
                 )
             }
         }
@@ -353,11 +343,20 @@ fun AnimeListItem(
 @Composable
 fun UserListScreenPreview() {
     AnimBroTheme {
-        UserListScreen(viewModel = PreviewAnimeListViewModel())
+        Scaffold(
+            bottomBar = {
+                BottomNavigationBar(currentRoute = "animelist")
+            }
+        ) { paddingValues ->
+            UserListScreen(
+                viewModel = previewAnimeListViewModel(),
+                modifier = Modifier.padding(paddingValues)
+            )
+        }
     }
 }
 
-private fun PreviewAnimeListViewModel(): AnimeListViewModel {
+private fun previewAnimeListViewModel(): AnimeListViewModel {
     val mockRepository = object : com.example.animbro.domain.repository.AnimeRepository {
         override suspend fun getTopRatedAnime(limit: Int) = emptyList<Anime>()
         override suspend fun getPopularAnime(limit: Int) = emptyList<Anime>()

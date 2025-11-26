@@ -46,4 +46,5 @@
     <string name="title_activity_forgot_password">ForgotPassword</string>
     <string name="title_activity_verify_email_sent">VerifyEmailSent</string>
     <string name="title_activity_anime_list">AnimeList</string>
+    <string name="title_activity_bottom_navigation_bar">BottomNavigationBar</string>
 </resources>
