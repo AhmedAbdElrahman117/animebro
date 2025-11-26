@@ -320,7 +320,7 @@ fun AnimeListItem(
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            text = if (anime.score > 0) (anime.score / 10.0).toString() else "N/A",
+                            text = if (anime.score != null && anime.score > 0) anime.score.toString() else "N/A",
                             fontSize = 13.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = Color.Black
@@ -373,7 +373,7 @@ private fun PreviewAnimeListViewModel(): AnimeListViewModel {
                     image = null,
                     episodes = 12,
                     status = "TV",
-                    score = 85
+                    score = 85.0.toFloat()
                 )
             }
         )

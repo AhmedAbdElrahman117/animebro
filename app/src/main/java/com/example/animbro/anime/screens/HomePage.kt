@@ -96,6 +96,7 @@ class HomeActivity : ComponentActivity() {
         }
         startActivity(intent)
     }
+
     private fun getApiInstance(): Endpoints {
 
         val logging = okhttp3.logging.HttpLoggingInterceptor().apply {
@@ -129,6 +130,7 @@ class HomeActivity : ComponentActivity() {
         return db.watchListDao()
     }
 }
+
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel,
@@ -333,7 +335,7 @@ private fun getSampleAnime() = Anime(
     status = "Finished Airing",
     episodes = 25,
     rating = "R - 17+",
-    score = 85,
+    score = 8.5.toFloat(),
     popularity = 1,
     duration = 24,
     startDate = "2013-04-07",
@@ -359,7 +361,9 @@ private fun PreviewHomeViewModel(): HomeViewModel {
         override suspend fun getFavouritesAnime(limit: Int) = getSampleAnimeList()
         override suspend fun searchAnime(query: String) = getSampleAnimeList()
         override suspend fun getAnimeDetails(id: Int) = getSampleAnime()
-        override fun getWatchListByCategory(category: String) = MutableStateFlow(getSampleAnimeList())
+        override fun getWatchListByCategory(category: String) =
+            MutableStateFlow(getSampleAnimeList())
+
         override suspend fun addToWatchList(anime: Anime, category: String) {}
         override suspend fun removeFromWatchList(id: Int) {}
     }
@@ -487,7 +491,7 @@ fun PosterSection(
 
                 Text(
                     text = buildString {
-                        if (anime.score > 0) append("★ ${anime.score / 10.0}")
+                        if (anime.score > 0) append("★ ${anime.score}")
                         if (anime.startDate?.isNotEmpty() == true) {
                             if (isNotEmpty()) append(" • ")
                             append(anime.startDate)
@@ -625,6 +629,7 @@ fun AnimeCard(
         }
     }
 }
+
 @Composable
 fun SearchBar(onClick: () -> Unit) {
     val darkBlue = Color(0xFF0A3D62)

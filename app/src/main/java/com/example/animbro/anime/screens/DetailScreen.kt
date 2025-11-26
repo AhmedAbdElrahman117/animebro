@@ -1,6 +1,9 @@
 package com.example.animbro.anime.screens
 
+import android.net.Uri
 import android.os.Bundle
+import android.util.Log
+import android.webkit.WebChromeClient
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -11,12 +14,16 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,6 +37,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.animbro.banner.Banner
@@ -48,11 +58,19 @@ import com.example.animbro.data.remote.AuthInterceptor
 import androidx.room.Room
 import com.example.animbro.anime.services.DetailViewModel
 import com.example.animbro.anime.services.DetailViewModelFactory
+import com.example.animbro.data.remote.dto.VideoDTO
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
+
+enum class DetailTab {
+    DETAILS,
+    TRAILERS
+}
 
 class DetailActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
 
         val animeId = intent.getIntExtra("animeId", -1)
 
@@ -69,10 +87,23 @@ class DetailActivity : ComponentActivity() {
                         factory = DetailViewModelFactory(repository, animeId)
                     )
 
-                    DetailScreen(viewModel = viewModel)
+                    DetailScreen(
+                        viewModel = viewModel,
+                        onAnimeClick = { newId ->
+                            navigateToDetail(newId)
+                        }
+                    )
                 }
             }
         }
+    }
+
+    private fun navigateToDetail(animeId: Int) {
+        val intent = android.content.Intent(this, DetailActivity::class.java).apply {
+            putExtra("animeId", animeId)
+        }
+        startActivity(intent)
+//        finish()
     }
 
     private fun getApiInstance(): Endpoints {
@@ -107,20 +138,24 @@ class DetailActivity : ComponentActivity() {
         return db.watchListDao()
     }
 
-    private fun onDetailsClick() {
-        // TODO: Implement details click later
-    }
-
-    private fun onTrailerClick() {
-        // TODO: Implement trailer click later
-    }
+//    private fun onDetailsClick() {
+//        // TODO: Implement details click later
+//    }
+//
+//    private fun onTrailerClick() {
+//        // TODO: Implement trailer click later
+//    }
 }
+
 
 @Composable
 fun DetailScreen(
-    viewModel: DetailViewModel
+    viewModel: DetailViewModel,
+    onAnimeClick: (Int) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+
+    var currentTab by remember { mutableStateOf(DetailTab.DETAILS) }
 
     Box(modifier = Modifier.fillMaxSize()) {
         when {
@@ -129,6 +164,7 @@ fun DetailScreen(
                     modifier = Modifier.align(Alignment.Center)
                 )
             }
+
             uiState.error != null -> {
                 Snackbar(
                     modifier = Modifier
@@ -143,12 +179,13 @@ fun DetailScreen(
                     Text(uiState.error ?: "An error occurred")
                 }
             }
+
             uiState.anime != null -> {
                 val anime = uiState.anime!!
                 DetailContent(
                     anime = anime,
                     screenPadding = 20.dp,
-                    onCardClick = { /* TODO: Navigate to recommendation details */ }
+                    onCardClick = onAnimeClick
                 )
             }
         }
@@ -161,7 +198,14 @@ fun DetailContent(
     screenPadding: Dp = 20.dp,
     onCardClick: (Int) -> Unit = {}
 ) {
-    Column(modifier = Modifier.fillMaxSize()) {
+    var currentTab by remember { mutableStateOf(DetailTab.DETAILS) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .background(Color.White)
+    ) {
         AnimePosterSection(
             imageUrl = anime.image?.large ?: anime.image?.medium,
             title = anime.title,
@@ -172,20 +216,100 @@ fun DetailContent(
                     if (isNotEmpty()) append(" • ")
                     append("${anime.episodes} eps")
                 }
-            }
+            },
+            selectedTab = currentTab,
+            onTabSelected = { newTab -> currentTab = newTab }
         )
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = screenPadding)
-                .padding(top = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(18.dp)
-        ) {
-            // Description Section
+        when (currentTab) {
+            DetailTab.DETAILS -> DetailsBody(anime, onCardClick)
+            DetailTab.TRAILERS -> TrailersBody(anime.videos)
+        }
+
+    }
+}
+
+@Composable
+fun DetailsBody(
+    anime: Anime,
+    onCardClick: (Int) -> Unit
+) {
+
+    Column(
+        modifier = Modifier.padding(horizontal = 20.dp, vertical = 24.dp),
+        verticalArrangement = Arrangement.spacedBy(24.dp)
+    ) {
+        // Description Section
+        Column {
+            Text(
+                text = "Description",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = colorResource(id = R.color.text_blue)
+            )
+
+            Spacer(Modifier.height(8.dp))
+
+            Text(
+                text = anime.description ?: "No description available",
+                fontSize = 14.sp,
+                maxLines = 4,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            Text(
+                text = "Read more",
+                modifier = Modifier.padding(top = 6.dp),
+                color = colorResource(id = R.color.text_blue),
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+
+        // Stats Section
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                StatCard(
+                    "Score",
+                    if (anime.score > 0) String.format(
+                        "%.2f",
+                        anime.score
+                    ) else "N/A",
+                    Modifier.weight(1f)
+                )
+                StatCard(
+                    "Rank",
+                    if (anime.rank != null && anime.rank > 0) "#${anime.rank}" else "N/A",
+                    Modifier.weight(1f)
+                )
+                StatCard(
+                    "Popularity",
+                    if (anime.popularity != null && anime.popularity > 0) "#${anime.popularity}" else "N/A",
+                    Modifier.weight(1f)
+                )
+            }
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                StatCard("Episodes", "${anime.episodes}", Modifier.weight(1f))
+                StatCard(
+                    "Duration",
+                    if (anime.duration != null && anime.duration > 0) "${anime.duration}m" else "N/A",
+                    Modifier.weight(1f)
+                )
+                StatCard("Rating", anime.rating ?: "-", Modifier.weight(1f))
+            }
+        }
+
+        // Genres Section
+        if (!anime.genres.isNullOrEmpty()) {
             Column {
                 Text(
-                    text = "Description",
+                    text = "Genres",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = colorResource(id = R.color.text_blue)
@@ -193,138 +317,158 @@ fun DetailContent(
 
                 Spacer(Modifier.height(8.dp))
 
-                Text(
-                    text = anime.description ?: "No description available",
-                    fontSize = 14.sp,
-                    maxLines = 4,
-                    overflow = TextOverflow.Ellipsis
-                )
-
-                Text(
-                    text = "Read more",
-                    modifier = Modifier.padding(top = 6.dp),
-                    color = colorResource(id = R.color.text_blue),
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
-
-            // Stats Section
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    contentPadding = PaddingValues(horizontal = 2.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    StatCard(
-                        "Score",
-                        "${anime.score / 10.0}",
-                        Modifier.weight(1f)
-                    )
-                    StatCard(
-                        "Rank",
-                        if (anime.rank != null && anime.rank > 0) "#${anime.rank}" else "N/A",
-                        Modifier.weight(1f)
-                    )
-                    StatCard(
-                        "Popularity",
-                        if (anime.popularity != null && anime.popularity > 0) "#${anime.popularity}" else "N/A",
-                        Modifier.weight(1f)
-                    )
-                }
-
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    StatCard("Episodes", "${anime.episodes}", Modifier.weight(1f))
-                    StatCard(
-                        "Duration",
-                        if (anime.duration != null && anime.duration > 0) "${anime.duration}m" else "N/A",
-                        Modifier.weight(1f)
-                    )
-                    StatCard("Rating", anime.rating ?: "-", Modifier.weight(1f))
-                }
-            }
-
-            // Genres Section
-            if (!anime.genres.isNullOrEmpty()) {
-                Column {
-                    Text(
-                        text = "Genres",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        color = colorResource(id = R.color.text_blue)
-                    )
-
-                    Spacer(Modifier.height(8.dp))
-
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        anime.genres!!.forEach { genre ->
-                            GenreChip(genre.name)
-                        }
+                    items(anime.genres!!) { genre ->
+                        GenreChip(genre.name)
                     }
                 }
             }
+        }
 
-            // Gallery Section
-            if (!anime.pictures.isNullOrEmpty()) {
-                Column {
-                    Text(
-                        text = "Gallery",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        color = colorResource(id = R.color.text_blue)
-                    )
+        // Gallery Section
+        if (!anime.pictures.isNullOrEmpty()) {
+            Column {
+                Text(
+                    text = "Gallery",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = colorResource(id = R.color.text_blue)
+                )
 
-                    Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(8.dp))
 
-                    LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        items(anime.pictures!!) { picture ->
-                            AsyncImage(
-                                model = picture.large,
-                                contentDescription = null,
-                                modifier = Modifier
-                                    .width(140.dp)
-                                    .height(200.dp)
-                                    .clip(RoundedCornerShape(12.dp)),
-                                contentScale = ContentScale.Crop,
-                                placeholder = painterResource(R.drawable.poster_sample),
-                                error = painterResource(R.drawable.poster_sample)
-                            )
-                        }
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    items(anime.pictures!!) { picture ->
+                        AsyncImage(
+                            model = picture.large,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .width(140.dp)
+                                .height(200.dp)
+                                .clip(RoundedCornerShape(12.dp)),
+                            contentScale = ContentScale.Crop,
+                            placeholder = painterResource(R.drawable.poster_sample),
+                            error = painterResource(R.drawable.poster_sample)
+                        )
                     }
                 }
             }
+        }
 
-            // Recommendations Section
-            if (!anime.recommendations.isNullOrEmpty()) {
-                Column {
-                    Text(
-                        text = "Recommendations",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        color = colorResource(id = R.color.text_blue)
-                    )
+        // Recommendations Section
+        if (!anime.recommendations.isNullOrEmpty()) {
+            Column {
+                Text(
+                    text = "Recommendations",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = colorResource(id = R.color.text_blue)
+                )
 
-                    Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(8.dp))
 
-                    LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        items(anime.recommendations!!) { recommendation ->
-                            RecommendationCard(
-                                anime = recommendation.node,
-                                onClick = { onCardClick(recommendation.node.id) }
-                            )
-                        }
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    items(anime.recommendations!!) { recommendation ->
+                        RecommendationCard(
+                            anime = recommendation.node,
+                            onClick = { onCardClick(recommendation.node.id) }
+                        )
                     }
                 }
             }
+        }
 
-            Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(12.dp))
+    }
+
+}
+
+
+@Composable
+fun TrailersBody(videos: List<VideoDTO>?) {
+    if (videos.isNullOrEmpty()) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(40.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text("No trailers available", color = Color.Gray)
+        }
+    } else {
+        Column(
+            modifier = Modifier.padding(horizontal = 20.dp, vertical = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
+        ) {
+            videos.forEach { video ->
+                Text(video.title, fontWeight = FontWeight.Bold)
+
+                YouTubePlayer(
+                    videoId = extractVideoId(video.url),
+                    lifeCycleOwner = LocalLifecycleOwner.current
+                )
+                Log.d("VIDEO", video.url)
+            }
         }
     }
 }
+
+@Composable
+fun YouTubePlayer(
+    videoId: String,
+    lifeCycleOwner: LifecycleOwner
+) {
+    AndroidView(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        factory = {
+            YouTubePlayerView(context = it).apply {
+                lifeCycleOwner.lifecycle.addObserver(this)
+                addYouTubePlayerListener(object : AbstractYouTubePlayerListener() {
+                    override fun onReady(youTubePlayer: YouTubePlayer) {
+                        youTubePlayer.cueVideo(videoId = videoId, 0f)
+                    }
+                })
+            }
+        }
+    )
+}
+
+fun extractVideoId(url: String): String {
+    return try {
+        val uri = Uri.parse(url)
+        when {
+            // Case 1: Short URL (https://youtu.be/LHtdKWJdif4)
+            // The ID is simply the last part of the path
+            uri.host?.contains("youtu.be") == true -> {
+                uri.lastPathSegment ?: ""
+            }
+
+            // Case 2: Standard URL (https://www.youtube.com/watch?v=LHtdKWJdif4)
+            // The ID is the value of the query parameter "v"
+            uri.host?.contains("youtube.com") == true -> {
+                uri.getQueryParameter("v") ?: ""
+            }
+
+            // Case 3: Embed URL (https://www.youtube.com/embed/LHtdKWJdif4)
+            // Sometimes APIs send this. The ID is the last part of the path.
+            uri.path?.contains("embed") == true -> {
+                uri.lastPathSegment ?: ""
+            }
+
+            // Fallback: If it fails, return empty
+            else -> ""
+        }
+    } catch (e: Exception) {
+        ""
+    }
+}
+
 
 @Composable
 fun StatCard(title: String, value: String, modifier: Modifier = Modifier) {
@@ -379,7 +523,10 @@ fun GenreChip(text: String) {
 }
 
 @Composable
-fun RecommendationCard(anime: com.example.animbro.data.remote.dto.AnimeNodeDTO, onClick: () -> Unit) {
+fun RecommendationCard(
+    anime: com.example.animbro.data.remote.dto.AnimeNodeDTO,
+    onClick: () -> Unit
+) {
     Card(
         modifier = Modifier
             .width(120.dp)
@@ -415,12 +562,14 @@ fun AnimePosterSection(
     imageUrl: String?,
     title: String,
     subtitle: String,
-    seasonInfo: String
+    seasonInfo: String,
+    selectedTab: DetailTab,
+    onTabSelected: (DetailTab) -> Unit
 ) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(360.dp)
+            .height(400.dp)
     ) {
         AsyncImage(
             model = imageUrl,
@@ -483,7 +632,14 @@ fun AnimePosterSection(
                     .padding(16.dp)
             ) {
                 OutlinedButton(
-                    onClick = { /* TODO: Implement trailer click */ },
+                    onClick = { onTabSelected(DetailTab.DETAILS) },
+                    border = BorderStroke(2.dp, colorResource(R.color.text_blue))
+                ) {
+                    Text("Details", color = colorResource(id = R.color.text_blue))
+                }
+
+                OutlinedButton(
+                    onClick = { onTabSelected(DetailTab.TRAILERS) },
                     border = BorderStroke(2.dp, colorResource(R.color.text_blue))
                 ) {
                     Text("Trailer", color = colorResource(id = R.color.text_blue))

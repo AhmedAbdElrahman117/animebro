@@ -42,7 +42,7 @@ fun Banner(
             contentDescription = "Logo",
             modifier = Modifier
                 .height(height)
-                .padding(start = 4.dp),
+                .padding(start = 2.dp),
             contentScale = ContentScale.Fit
         )
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -50,17 +50,17 @@ fun Banner(
                 painter = painterResource(id = R.drawable.fav_ic),
                 contentDescription = "Favorite",
                 modifier = Modifier
-                    .size(height)
-                    .padding(5.dp)
+                    .size(50.dp)
+                    .padding(2.dp)
                     .clickable { onFavClick() },
-                contentScale = ContentScale.Fit
+                contentScale = ContentScale.Fit,
             )
             Image(
                 painter = painterResource(id = R.drawable.saved_ic),
                 contentDescription = "Saved",
                 modifier = Modifier
-                    .size(height)
-                    .padding(5.dp)
+                    .size(50.dp)
+                    .padding(2.dp)
                     .clickable { onSavedClick() },
                 contentScale = ContentScale.Fit
             )
@@ -68,8 +68,8 @@ fun Banner(
                 painter = painterResource(id = R.drawable.acc_ic),
                 contentDescription = "Account",
                 modifier = Modifier
-                    .size(height)
-                    .padding(5.dp)
+                    .size(50.dp)
+                    .padding(2.dp)
                     .clickable { onAccClick() },
                 contentScale = ContentScale.Fit
             )

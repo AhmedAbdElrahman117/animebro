@@ -13,8 +13,8 @@ data class AnimeNodeDTO(
     @SerializedName("num_episodes")
     val episodes: Int,
     val rating: String?,
-    @SerializedName("num_scoring_users")
-    val score: Int,
+    @SerializedName("mean")
+    val score: Float?,
     val popularity: Int?,
     @SerializedName("average_episode_duration")
     val duration: Int?,

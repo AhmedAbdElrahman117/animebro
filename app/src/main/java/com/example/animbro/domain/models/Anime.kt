@@ -13,7 +13,7 @@ data class Anime(
     val status: String = "",
     val episodes: Int = 0,
     val rating: String? = "",
-    val score: Int = 0,
+    val score: Float = 0.toFloat(),
     val popularity: Int? = 0,
     val duration: Int? = 0,
     val startDate: String? = "",
@@ -26,6 +26,7 @@ data class Anime(
     val pictures: List<MainPictureDTO>? = emptyList(),
     val isFavourite: Boolean = false
 )
+
 data class AnimeItem(
     val id: Int,
     val title: String,

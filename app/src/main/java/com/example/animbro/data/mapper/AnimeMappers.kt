@@ -25,7 +25,7 @@ fun AnimeNodeDTO.toDomain(): Anime {
         videos = videos,
         recommendations = recommendations,
         pictures = pictures,
-        score = score,
+        score = score ?: 0.0.toFloat(),
     )
 }
 
