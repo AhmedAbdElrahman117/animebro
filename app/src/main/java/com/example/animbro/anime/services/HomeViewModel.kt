@@ -13,9 +13,12 @@ data class HomeUiState(
     val trendingAnime: List<Anime> = emptyList(),
     val topRankedAnime: List<Anime> = emptyList(),
     val upcomingAnime: List<Anime> = emptyList(),
-    val allAnime: List<Anime> = emptyList(),
+    val favouriteAnime: List<Anime> = emptyList(),
     val isLoading: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
+    val randomAnimeId: Int? = null,
+    val isRandomLoading: Boolean = false,
+    val randomError: String? = null
 )
 
 class HomeViewModel(
@@ -24,6 +27,7 @@ class HomeViewModel(
 
     val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
+
 
     init {
         loadAllAnimeData()
@@ -36,11 +40,11 @@ class HomeViewModel(
                 val trendingDeferred = launch { loadTrendingAnime() }
                 val topRankedDeferred = launch { loadTopRankedAnime() }
                 val upcomingDeferred = launch { loadUpcomingAnime() }
-                val allAnimeDeferred = launch { loadAllAnime() }
+                val favouriteAnimeDeferred = launch { loadFavouriteAnime() }
                 trendingDeferred.join()
                 topRankedDeferred.join()
                 upcomingDeferred.join()
-                allAnimeDeferred.join()
+                favouriteAnimeDeferred.join()
                 _uiState.value = _uiState.value.copy(isLoading = false)
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
@@ -79,13 +83,58 @@ class HomeViewModel(
         }
     }
 
-    private suspend fun loadAllAnime() {
+    private suspend fun loadFavouriteAnime() {
         try {
-            val anime = repository.getTopRatedAnime(limit = 10)
-            _uiState.value = _uiState.value.copy(allAnime = anime)
+            val anime = repository.getFavouritesAnime(limit = 10)
+            _uiState.value = _uiState.value.copy(favouriteAnime = anime)
         } catch (e: Exception) {
             e.printStackTrace()
         }
+    }
+
+    fun findRandomAnime() {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(
+                isRandomLoading = true,
+                randomError = null,
+                randomAnimeId = null
+            )
+
+            var validIdFound = false
+            var attempts = 0
+            val maxAttempts = 10
+
+            while (!validIdFound && attempts < maxAttempts) {
+                val randomId = (1..60000).random()
+
+                try {
+                    val anime = repository.getAnimeDetails(randomId)
+
+                    if (anime != null) {
+                        validIdFound = true
+                        _uiState.value = _uiState.value.copy(
+                            isRandomLoading = false,
+                            randomAnimeId = anime.id
+                        )
+                    }
+                } catch (e: Exception) {
+
+                }
+
+                attempts++
+            }
+
+            if (!validIdFound) {
+                _uiState.value = _uiState.value.copy(
+                    isRandomLoading = false,
+                    randomError = "Could not find a random anime. Please try again."
+                )
+            }
+        }
+    }
+
+    fun onRandomAnimeNavigated() {
+        _uiState.value = _uiState.value.copy(randomAnimeId = null)
     }
 
     fun onRefresh() {

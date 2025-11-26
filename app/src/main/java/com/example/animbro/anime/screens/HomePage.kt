@@ -54,6 +54,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.ui.platform.LocalContext
 import android.inputmethodservice.Keyboard.Row
+import androidx.compose.runtime.LaunchedEffect
 
 class HomeActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -140,13 +141,31 @@ fun HomeScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
+    LaunchedEffect(uiState.randomAnimeId) {
+        uiState.randomAnimeId?.let { id ->
+            onAnimeClick(id)
+            viewModel.onRandomAnimeNavigated()
+        }
+    }
+
     Scaffold(
         floatingActionButton = {
-            FloatingActionButton(onClick = { /* random anime */ }) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_dice),
-                    contentDescription = "Random"
-                )
+            FloatingActionButton(onClick = {
+                if (!uiState.isRandomLoading) {
+                    viewModel.findRandomAnime()
+                }
+            }) {
+                if (uiState.isRandomLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = Color.White
+                    )
+                } else {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_dice),
+                        contentDescription = "Random"
+                    )
+                }
             }
         }
     ) { paddingValues ->
@@ -224,11 +243,11 @@ fun HomeScreen(
                     )
                 }
 
-                // All Anime Section
+                // Favourite Anime Section
                 item {
                     AnimeSection(
-                        title = "All Anime",
-                        animeList = uiState.allAnime,
+                        title = "Most Favourite Anime",
+                        animeList = uiState.favouriteAnime,
                         screenPadding = screenPadding,
                         onAnimeClick = onAnimeClick,
                         onMoreClick = { onMoreClick("All Anime") }

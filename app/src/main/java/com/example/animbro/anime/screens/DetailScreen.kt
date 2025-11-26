@@ -235,6 +235,9 @@ fun DetailsBody(
     onCardClick: (Int) -> Unit
 ) {
 
+    var isExpanded by remember { mutableStateOf(false) }
+    var isTextOverflowing by remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier.padding(horizontal = 20.dp, vertical = 24.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp)
@@ -253,16 +256,26 @@ fun DetailsBody(
             Text(
                 text = anime.description ?: "No description available",
                 fontSize = 14.sp,
-                maxLines = 4,
-                overflow = TextOverflow.Ellipsis
+                maxLines = if (isExpanded) Int.MAX_VALUE else 4,
+                overflow = TextOverflow.Ellipsis,
+                onTextLayout = { textLayoutResult ->
+                    if (!isExpanded) {
+                        isTextOverflowing = textLayoutResult.hasVisualOverflow
+                    }
+                },
+                modifier = Modifier.clickable { isExpanded = !isExpanded }
             )
 
-            Text(
-                text = "Read more",
-                modifier = Modifier.padding(top = 6.dp),
-                color = colorResource(id = R.color.text_blue),
-                fontWeight = FontWeight.SemiBold
-            )
+            if (isTextOverflowing || isExpanded) {
+                Text(
+                    text = if (isExpanded) "Read less" else "Read more",
+                    modifier = Modifier
+                        .padding(top = 6.dp)
+                        .clickable { isExpanded = !isExpanded },
+                    color = colorResource(id = R.color.text_blue),
+                    fontWeight = FontWeight.SemiBold,
+                )
+            }
         }
 
         // Stats Section
