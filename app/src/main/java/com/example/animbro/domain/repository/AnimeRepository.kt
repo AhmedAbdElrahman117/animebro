@@ -14,6 +14,12 @@ interface AnimeRepository {
     fun getWatchListByCategory(category: String): Flow<List<Anime>>
     suspend fun addToWatchList(anime: Anime, category: String)
     suspend fun removeFromWatchList(id: Int)
+
+    fun isDarkMode(): Flow<Boolean>
+    fun areNotificationsEnabled(): Flow<Boolean>
+
+    suspend fun setDarkMode(enabled: Boolean)
+    suspend fun setNotificationsEnabled(enabled: Boolean)
 }
 
 

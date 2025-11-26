@@ -1,9 +1,11 @@
 package com.example.animbro.anime.screens
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -36,29 +38,27 @@ import kotlinx.coroutines.launch
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.animbro.anime.components.Banner
 import com.example.animbro.anime.services.AnimeListViewModel
-import com.example.animbro.anime.services.AnimeListViewModelFactory
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.animbro.data.local.dao.WatchListDAO
 import com.example.animbro.data.remote.Endpoints
 import com.example.animbro.repositories.AnimeRepositoryImp
 import com.example.animbro.domain.models.Anime
 import androidx.compose.ui.text.style.TextAlign
+import dagger.hilt.android.AndroidEntryPoint
 
 
+@AndroidEntryPoint
 class AnimeListActivity : ComponentActivity() {
+
+    private val viewModel: AnimeListViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             AnimBroTheme {
-                val repository = remember {
-                    val api: Endpoints = getApiInstance()
-                    val dao: WatchListDAO = getDaoInstance()
-                    AnimeRepositoryImp(api, dao)
-                }
 
-                val viewModel: AnimeListViewModel = viewModel(
-                    factory = AnimeListViewModelFactory(repository)
-                )
+                val viewModel: AnimeListViewModel = hiltViewModel()
 
                 Scaffold(
                     bottomBar = {
@@ -67,42 +67,26 @@ class AnimeListActivity : ComponentActivity() {
                 ) { paddingValues ->
                     UserListScreen(
                         viewModel = viewModel,
-                        modifier = Modifier.padding(paddingValues)
+                        modifier = Modifier.padding(paddingValues),
+                        onAnimeClick = { animeId ->
+                            val intent = Intent(this, DetailActivity::class.java).apply {
+                                putExtra("animeId", animeId)
+                            }
+                            startActivity(intent)
+                        }
                     )
                 }
             }
         }
     }
-
-    private fun getApiInstance(): Endpoints {
-        val logging = okhttp3.logging.HttpLoggingInterceptor().apply {
-            level = okhttp3.logging.HttpLoggingInterceptor.Level.BODY
-        }
-
-        val retrofit = retrofit2.Retrofit.Builder()
-            .baseUrl(com.example.animbro.data.remote.BASE_URL)
-            .addConverterFactory(retrofit2.converter.gson.GsonConverterFactory.create(com.google.gson.Gson()))
-            .build()
-
-        return retrofit.create(Endpoints::class.java)
-    }
-
-    private fun getDaoInstance(): WatchListDAO {
-        val db = androidx.room.Room
-            .databaseBuilder(
-                this,
-                com.example.animbro.data.local.AppDatabase::class.java,
-                "animbro_db"
-            )
-            .fallbackToDestructiveMigration()
-            .build()
-
-        return db.watchListDao()
-    }
 }
 
 @Composable
-fun UserListScreen(viewModel: AnimeListViewModel, modifier: Modifier = Modifier) {
+fun UserListScreen(
+    viewModel: AnimeListViewModel,
+    modifier: Modifier = Modifier,
+    onAnimeClick: (Int) -> Unit
+) {
     val tabs = listOf("Watching", "Completed", "Dropped", "Pending")
     val pagerState = rememberPagerState(
         initialPage = 0,
@@ -172,7 +156,8 @@ fun UserListScreen(viewModel: AnimeListViewModel, modifier: Modifier = Modifier)
                 key(page) {
                     AnimeListPage(
                         animeList = animeList,
-                        category = tabName
+                        category = tabName,
+                        onAnimeClick = onAnimeClick
                     )
                 }
             }
@@ -181,7 +166,11 @@ fun UserListScreen(viewModel: AnimeListViewModel, modifier: Modifier = Modifier)
 }
 
 @Composable
-fun AnimeListPage(animeList: List<Anime>, category: String = "") {
+fun AnimeListPage(
+    animeList: List<Anime>,
+    category: String = "",
+    onAnimeClick: (Int) -> Unit
+) {
     // Hoist painter resources to avoid repeated lookups
     val placeholderPainter = painterResource(id = R.drawable.poster_sample)
     val errorPainter = painterResource(id = R.drawable.poster_sample)
@@ -236,7 +225,8 @@ fun AnimeListPage(animeList: List<Anime>, category: String = "") {
                     anime = anime,
                     placeholderPainter = placeholderPainter,
                     errorPainter = errorPainter,
-                    savedIconPainter = savedIconPainter
+                    savedIconPainter = savedIconPainter,
+                    onClick = { onAnimeClick(anime.id) }
                 )
             }
         }
@@ -267,13 +257,14 @@ fun AnimeListItem(
     anime: Anime,
     placeholderPainter: androidx.compose.ui.graphics.painter.Painter,
     errorPainter: androidx.compose.ui.graphics.painter.Painter,
-    savedIconPainter: androidx.compose.ui.graphics.painter.Painter
+    savedIconPainter: androidx.compose.ui.graphics.painter.Painter,
+    onClick: () -> Unit
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .height(120.dp)
-            .clickable { /* TODO: make it go to the anime details*/},
+            .clickable { onClick() },
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
@@ -379,45 +370,48 @@ fun AnimeListItem(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun UserListScreenPreview() {
-    AnimBroTheme {
-        Scaffold(
-            bottomBar = {
-                BottomNavigationBar(currentRoute = "animelist")
-            }
-        ) { paddingValues ->
-            UserListScreen(
-                viewModel = previewAnimeListViewModel(),
-                modifier = Modifier.padding(paddingValues)
-            )
-        }
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun UserListScreenPreview() {
+//    AnimBroTheme {
+//        Scaffold(
+//            bottomBar = {
+//                BottomNavigationBar(currentRoute = "animelist")
+//            }
+//        ) { paddingValues ->
+//            UserListScreen(
+//                viewModel = previewAnimeListViewModel(),
+//                modifier = Modifier.padding(paddingValues),
+//                onAnimeClick = {}
+//            )
+//        }
+//    }
+//}
 
-private fun previewAnimeListViewModel(): AnimeListViewModel {
-    val mockRepository = object : com.example.animbro.domain.repository.AnimeRepository {
-        override suspend fun getTopRatedAnime(limit: Int) = emptyList<Anime>()
-        override suspend fun getPopularAnime(limit: Int) = emptyList<Anime>()
-        override suspend fun getUpcomingAnime(limit: Int) = emptyList<Anime>()
-        override suspend fun getFavouritesAnime(limit: Int) = emptyList<Anime>()
-        override suspend fun searchAnime(query: String) = emptyList<Anime>()
-        override suspend fun getAnimeDetails(id: Int) = null
-        override fun getWatchListByCategory(category: String) = kotlinx.coroutines.flow.MutableStateFlow(
-            List(5) {
-                Anime(
-                    id = it,
-                    title = "Sample Anime $it",
-                    image = null,
-                    episodes = 12,
-                    status = "TV",
-                    score = 85.0.toFloat()
-                )
-            }
-        )
-        override suspend fun addToWatchList(anime: Anime, category: String) {}
-        override suspend fun removeFromWatchList(id: Int) {}
-    }
-    return AnimeListViewModel(mockRepository)
-}
+//private fun previewAnimeListViewModel(): AnimeListViewModel {
+//    val mockRepository = object : com.example.animbro.domain.repository.AnimeRepository {
+//        override suspend fun getTopRatedAnime(limit: Int) = emptyList<Anime>()
+//        override suspend fun getPopularAnime(limit: Int) = emptyList<Anime>()
+//        override suspend fun getUpcomingAnime(limit: Int) = emptyList<Anime>()
+//        override suspend fun getFavouritesAnime(limit: Int) = emptyList<Anime>()
+//        override suspend fun searchAnime(query: String) = emptyList<Anime>()
+//        override suspend fun getAnimeDetails(id: Int) = null
+//        override fun getWatchListByCategory(category: String) =
+//            kotlinx.coroutines.flow.MutableStateFlow(
+//                List(5) {
+//                    Anime(
+//                        id = it,
+//                        title = "Sample Anime $it",
+//                        image = null,
+//                        episodes = 12,
+//                        status = "TV",
+//                        score = 85.0.toFloat()
+//                    )
+//                }
+//            )
+//
+//        override suspend fun addToWatchList(anime: Anime, category: String) {}
+//        override suspend fun removeFromWatchList(id: Int) {}
+//    }
+//    return AnimeListViewModel(mockRepository)
+//}

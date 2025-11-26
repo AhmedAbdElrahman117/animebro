@@ -45,7 +45,6 @@ import com.example.animbro.repositories.AnimeRepositoryImp
 import com.example.animbro.ui.theme.AnimBroTheme
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.animbro.anime.services.HomeViewModel
-import com.example.animbro.anime.services.HomeViewModelFactory
 import com.example.animbro.anime.components.Banner
 import com.example.animbro.data.remote.AuthInterceptor
 import com.example.animbro.data.remote.BASE_URL
@@ -55,9 +54,16 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.ui.platform.LocalContext
 import com.example.animbro.anime.components.BottomNavigationBar
 import android.inputmethodservice.Keyboard.Row
+import androidx.activity.viewModels
 import androidx.compose.runtime.LaunchedEffect
+import androidx.hilt.navigation.compose.hiltViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
+
+@AndroidEntryPoint
 class HomeActivity : ComponentActivity() {
+    private val viewModel: HomeViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -66,23 +72,15 @@ class HomeActivity : ComponentActivity() {
             AnimBroTheme {
                 Scaffold(
                     bottomBar = {
-                BottomNavigationBar(currentRoute = "home")
-            }
+                        BottomNavigationBar(currentRoute = "home")
+                    }
 
                 ) { paddingValues ->
 
-                    val repository = remember {
-                        val api: Endpoints = getApiInstance()
-                        val dao: WatchListDAO = getDaoInstance()
-                        AnimeRepositoryImp(api, dao)
-                    }
-
                     // Create ViewModel with factory
-                    val viewModel: HomeViewModel = viewModel(
-                        factory = HomeViewModelFactory(repository)
-                    )
-                Box(modifier = Modifier.padding(paddingValues)) {
-                    HomeScreen(
+
+                    Box(modifier = Modifier.padding(paddingValues)) {
+                        HomeScreen(
                             viewModel = viewModel,
                             screenPadding = 20.dp,
                             onAnimeClick = { animeId ->
@@ -92,7 +90,7 @@ class HomeActivity : ComponentActivity() {
                                 // TODO: Navigate to section list screen
                             }
                         )
-            }
+                    }
 
                 }
             }
@@ -104,39 +102,6 @@ class HomeActivity : ComponentActivity() {
             putExtra("animeId", animeId)
         }
         startActivity(intent)
-    }
-
-    private fun getApiInstance(): Endpoints {
-
-        val logging = okhttp3.logging.HttpLoggingInterceptor().apply {
-            level = okhttp3.logging.HttpLoggingInterceptor.Level.BODY
-        }
-
-        val okHttp = okhttp3.OkHttpClient.Builder()
-            .addInterceptor(AuthInterceptor())
-            .addInterceptor(logging)
-            .build()
-
-        val retrofit = retrofit2.Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .client(okHttp)
-            .addConverterFactory(retrofit2.converter.gson.GsonConverterFactory.create(com.google.gson.Gson()))
-            .build()
-
-        return retrofit.create(Endpoints::class.java)
-    }
-
-    private fun getDaoInstance(): WatchListDAO {
-        val db = androidx.room.Room
-            .databaseBuilder(
-                this,
-                com.example.animbro.data.local.AppDatabase::class.java,
-                "animbro_db"
-            )
-            .fallbackToDestructiveMigration()
-            .build()
-
-        return db.watchListDao()
     }
 }
 
@@ -268,17 +233,17 @@ fun HomeScreen(
 }
 
 // Preview Functions
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun HomeScreenPreview() {
-    MaterialTheme {
-        HomeScreen(
-            viewModel = PreviewHomeViewModel(),
-            onAnimeClick = {},
-            onMoreClick = {}
-        )
-    }
-}
+//@Preview(showBackground = true, showSystemUi = true)
+//@Composable
+//fun HomeScreenPreview() {
+//    MaterialTheme {
+//        HomeScreen(
+//            viewModel = PreviewHomeViewModel(),
+//            onAnimeClick = {},
+//            onMoreClick = {}
+//        )
+//    }
+//}
 
 @Preview(showBackground = true)
 @Composable
@@ -358,23 +323,23 @@ private fun getSampleAnimeList() = listOf(
 )
 
 // Preview ViewModel - Creates a mock ViewModel with sample data
-private fun PreviewHomeViewModel(): HomeViewModel {
-    val mockRepository = object : com.example.animbro.domain.repository.AnimeRepository {
-        override suspend fun getTopRatedAnime(limit: Int) = getSampleAnimeList()
-        override suspend fun getPopularAnime(limit: Int) = getSampleAnimeList()
-        override suspend fun getUpcomingAnime(limit: Int) = getSampleAnimeList()
-        override suspend fun getFavouritesAnime(limit: Int) = getSampleAnimeList()
-        override suspend fun searchAnime(query: String) = getSampleAnimeList()
-        override suspend fun getAnimeDetails(id: Int) = getSampleAnime()
-        override fun getWatchListByCategory(category: String) =
-            MutableStateFlow(getSampleAnimeList())
-
-        override suspend fun addToWatchList(anime: Anime, category: String) {}
-        override suspend fun removeFromWatchList(id: Int) {}
-    }
-
-    return HomeViewModel(mockRepository)
-}
+//private fun PreviewHomeViewModel(): HomeViewModel {
+//    val mockRepository = object : com.example.animbro.domain.repository.AnimeRepository {
+//        override suspend fun getTopRatedAnime(limit: Int) = getSampleAnimeList()
+//        override suspend fun getPopularAnime(limit: Int) = getSampleAnimeList()
+//        override suspend fun getUpcomingAnime(limit: Int) = getSampleAnimeList()
+//        override suspend fun getFavouritesAnime(limit: Int) = getSampleAnimeList()
+//        override suspend fun searchAnime(query: String) = getSampleAnimeList()
+//        override suspend fun getAnimeDetails(id: Int) = getSampleAnime()
+//        override fun getWatchListByCategory(category: String) =
+//            MutableStateFlow(getSampleAnimeList())
+//
+//        override suspend fun addToWatchList(anime: Anime, category: String) {}
+//        override suspend fun removeFromWatchList(id: Int) {}
+//    }
+//
+//    return HomeViewModel(mockRepository)
+//}
 
 @Composable
 fun AnimeSection(

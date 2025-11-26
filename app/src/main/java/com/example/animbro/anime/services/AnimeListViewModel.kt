@@ -5,11 +5,14 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.animbro.domain.models.Anime
 import com.example.animbro.domain.repository.AnimeRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
+import javax.inject.Inject
 
-class AnimeListViewModel(
+@HiltViewModel
+class AnimeListViewModel @Inject constructor(
     private val repository: AnimeRepository
 ) : ViewModel() {
 
@@ -33,18 +36,5 @@ class AnimeListViewModel(
             "Pending" -> pendingList
             else -> watchingList // Default or empty
         }
-    }
-}
-
-class AnimeListViewModelFactory(
-    private val repository: AnimeRepository
-) : ViewModelProvider.Factory {
-
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(AnimeListViewModel::class.java)) {
-            return AnimeListViewModel(repository) as T
-        }
-        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }

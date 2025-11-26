@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -35,6 +36,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -54,18 +56,24 @@ import com.example.animbro.data.remote.BASE_URL
 import com.example.animbro.data.remote.AuthInterceptor
 import androidx.room.Room
 import com.example.animbro.anime.services.DetailViewModel
-import com.example.animbro.anime.services.DetailViewModelFactory
+import com.example.animbro.anime.services.HomeViewModel
 import com.example.animbro.data.remote.dto.VideoDTO
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
+import dagger.hilt.android.AndroidEntryPoint
+import kotlin.getValue
 
 enum class DetailTab {
     DETAILS,
     TRAILERS
 }
 
+@AndroidEntryPoint
 class DetailActivity : ComponentActivity() {
+    private val viewModel: DetailViewModel by viewModels()
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -74,16 +82,6 @@ class DetailActivity : ComponentActivity() {
         setContent {
             AnimBroTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { paddingValues ->
-                    val repository = remember {
-                        val api: Endpoints = getApiInstance()
-                        val dao: WatchListDAO = getDaoInstance()
-                        AnimeRepositoryImp(api, dao)
-                    }
-
-                    val viewModel: DetailViewModel = viewModel(
-                        factory = DetailViewModelFactory(repository, animeId)
-                    )
-
                     DetailScreen(
                         viewModel = viewModel,
                         onAnimeClick = { newId ->

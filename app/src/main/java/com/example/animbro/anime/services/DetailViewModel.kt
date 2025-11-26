@@ -1,13 +1,16 @@
 package com.example.animbro.anime.services
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.animbro.domain.models.Anime
 import com.example.animbro.domain.repository.AnimeRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 data class DetailUiState(
     val anime: Anime? = null,
@@ -15,23 +18,29 @@ data class DetailUiState(
     val error: String? = null
 )
 
-class DetailViewModel(
+@HiltViewModel
+class DetailViewModel @Inject constructor(
     private val repository: AnimeRepository,
-    private val animeId: Int
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
+
+    val animeId: Int = savedStateHandle.get<Int>("animeId") ?: -1
+
 
     private val _uiState = MutableStateFlow(DetailUiState())
     val uiState: StateFlow<DetailUiState> = _uiState.asStateFlow()
 
     init {
-        loadAnimeDetails()
+        if (animeId != -1) {
+            loadAnimeDetails()
+        }
     }
 
-    fun loadAnimeDetails() {
+    fun loadAnimeDetails(id: Int = animeId) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
             try {
-                val anime = repository.getAnimeDetails(animeId)
+                val anime = repository.getAnimeDetails(id)
                 if (anime != null) {
                     _uiState.value = _uiState.value.copy(
                         anime = anime,

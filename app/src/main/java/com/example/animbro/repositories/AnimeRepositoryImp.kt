@@ -4,15 +4,18 @@ import android.util.Log
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import com.example.animbro.data.local.dao.WatchListDAO
 import com.example.animbro.data.mapper.toDomain
+import com.example.animbro.data.prefs.PreferencesManager
 import com.example.animbro.data.remote.Endpoints
 import com.example.animbro.domain.models.Anime
 import com.example.animbro.domain.repository.AnimeRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
 
-class AnimeRepositoryImp(
+class AnimeRepositoryImp @Inject constructor(
     val api: Endpoints,
-    val db: WatchListDAO
+    val db: WatchListDAO,
+    val preferencesManager: PreferencesManager
 ) : AnimeRepository {
 
     suspend fun getAnimeRanking(
@@ -96,6 +99,22 @@ class AnimeRepositoryImp(
 
         if (anime != null)
             db.deleteAnime(anime)
+    }
+
+    override fun isDarkMode(): Flow<Boolean> {
+        return preferencesManager.isDarkMode
+    }
+
+    override fun areNotificationsEnabled(): Flow<Boolean> {
+        return preferencesManager.areNotificationsEnabled
+    }
+
+    override suspend fun setDarkMode(enabled: Boolean) {
+        return preferencesManager.setDarkMode(enabled)
+    }
+
+    override suspend fun setNotificationsEnabled(enabled: Boolean) {
+        preferencesManager.setNotificationsEnabled(enabled)
     }
 
 }

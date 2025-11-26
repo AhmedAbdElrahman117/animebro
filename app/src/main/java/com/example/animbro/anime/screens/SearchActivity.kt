@@ -3,6 +3,7 @@ package com.example.animbro.anime.screens
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -30,7 +31,6 @@ import androidx.room.Room
 import coil.compose.AsyncImage
 import com.example.animbro.R
 import com.example.animbro.anime.services.SearchViewModel
-import com.example.animbro.anime.services.SearchViewModelFactory
 import com.example.animbro.domain.models.Anime
 import com.example.animbro.repositories.AnimeRepositoryImp
 import com.example.animbro.data.local.dao.WatchListDAO
@@ -45,15 +45,16 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import androidx.compose.ui.res.painterResource
 import com.example.animbro.anime.components.BottomNavigationBar
+import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.lifecycle.HiltViewModel
 
+@AndroidEntryPoint
 class SearchActivity : ComponentActivity() {
+
+    private val viewModel: SearchViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val api = getApiInstance()
-        val dao = getDaoInstance()
-        val repository = AnimeRepositoryImp(api, dao)
 
         setContent {
             AnimBroTheme {
@@ -63,39 +64,12 @@ class SearchActivity : ComponentActivity() {
                     }
                 ) { paddingValues ->
                     SearchScreen(
-                        viewModel = viewModel(factory = SearchViewModelFactory(repository)),
+                        viewModel = viewModel,
                         modifier = Modifier.padding(paddingValues)
                     )
                 }
             }
         }
-    }
-
-    private fun getApiInstance(): Endpoints {
-        val logging = HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY }
-
-        val okHttp = OkHttpClient.Builder()
-            .addInterceptor(AuthInterceptor())
-            .addInterceptor(logging)
-            .build()
-
-        val retrofit = Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .client(okHttp)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-
-        return retrofit.create(Endpoints::class.java)
-    }
-
-    private fun getDaoInstance(): WatchListDAO {
-        val db = Room.databaseBuilder(
-            this,
-            AppDatabase::class.java,
-            "animbro_db"
-        ).fallbackToDestructiveMigration().build()
-
-        return db.watchListDao()
     }
 }
 
@@ -211,7 +185,11 @@ fun AnimeResultCard(anime: Anime, onClick: () -> Unit) {
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         shape = MaterialTheme.shapes.medium
     ) {
-        Row(modifier = Modifier.fillMaxSize().padding(8.dp)) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(8.dp)
+        ) {
             // صورة الأنمي
             AsyncImage(
                 model = anime.image?.medium ?: anime.image?.large,

@@ -7,6 +7,7 @@
         android:minSdkVersion="33" />
 
     <application
+        android:name=".AnimBroApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -52,8 +53,7 @@
             android:exported="true" />
         <activity
             android:name=".anime.screens.AnimeListActivity"
-            android:exported="false"
-            />
+            android:exported="false" />
     </application>
 
 </manifest>
