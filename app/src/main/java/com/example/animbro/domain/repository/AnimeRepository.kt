@@ -12,6 +12,7 @@ interface AnimeRepository {
     suspend fun getAnimeDetails(id: Int): Anime?
 
     fun getWatchListByCategory(category: String): Flow<List<Anime>>
+    suspend fun getAnimeCategory(id: Int): String?
     suspend fun addToWatchList(anime: Anime, category: String)
     suspend fun removeFromWatchList(id: Int)
 

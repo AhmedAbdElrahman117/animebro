@@ -57,6 +57,7 @@ import android.inputmethodservice.Keyboard.Row
 import androidx.activity.viewModels
 import androidx.compose.runtime.LaunchedEffect
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.animbro.anime.components.StatusUpdateDialog
 import dagger.hilt.android.AndroidEntryPoint
 
 
@@ -76,8 +77,6 @@ class HomeActivity : ComponentActivity() {
                     }
 
                 ) { paddingValues ->
-
-                    // Create ViewModel with factory
 
                     Box(modifier = Modifier.padding(paddingValues)) {
                         HomeScreen(
@@ -119,6 +118,19 @@ fun HomeScreen(
             onAnimeClick(id)
             viewModel.onRandomAnimeNavigated()
         }
+    }
+
+    if (uiState.isDialogVisible && uiState.selectedAnime != null) {
+        StatusUpdateDialog(
+            currentStatus = uiState.currentAnimeStatus,
+            onDismissRequest = { viewModel.dismissDialog() },
+            onStatusSelected = { category ->
+                viewModel.updateAnimeStatus(category)
+            },
+            onRemoveClick = {
+                viewModel.removeAnimeFromList()
+            }
+        )
     }
 
     Scaffold(
@@ -168,7 +180,8 @@ fun HomeScreen(
                         animeList = uiState.trendingAnime,
                         screenPadding = screenPadding,
                         onAnimeClick = onAnimeClick,
-                        onMoreClick = { onMoreClick("Trending") }
+                        onMoreClick = { onMoreClick("Trending") },
+                        onAddClick = { anime -> viewModel.onAddClick(anime) }
                     )
                 }
 
@@ -179,7 +192,8 @@ fun HomeScreen(
                         animeList = uiState.topRankedAnime,
                         screenPadding = screenPadding,
                         onAnimeClick = onAnimeClick,
-                        onMoreClick = { onMoreClick("Top Ranked") }
+                        onMoreClick = { onMoreClick("Top Ranked") },
+                        onAddClick = { anime -> viewModel.onAddClick(anime) }
                     )
                 }
 
@@ -190,7 +204,8 @@ fun HomeScreen(
                         animeList = uiState.upcomingAnime,
                         screenPadding = screenPadding,
                         onAnimeClick = onAnimeClick,
-                        onMoreClick = { onMoreClick("Upcoming") }
+                        onMoreClick = { onMoreClick("Upcoming") },
+                        onAddClick = { anime -> viewModel.onAddClick(anime) }
                     )
                 }
 
@@ -201,7 +216,8 @@ fun HomeScreen(
                         animeList = uiState.favouriteAnime,
                         screenPadding = screenPadding,
                         onAnimeClick = onAnimeClick,
-                        onMoreClick = { onMoreClick("All Anime") }
+                        onMoreClick = { onMoreClick("All Anime") },
+                        onAddClick = { anime -> viewModel.onAddClick(anime) }
                     )
                 }
             }
@@ -254,7 +270,8 @@ fun AnimeSectionPreview() {
             animeList = getSampleAnimeList(),
             screenPadding = 20.dp,
             onAnimeClick = {},
-            onMoreClick = {}
+            onMoreClick = {},
+            onAddClick = {}
         )
     }
 }
@@ -265,7 +282,8 @@ fun AnimeCardPreview() {
     MaterialTheme {
         AnimeCard(
             anime = getSampleAnime(),
-            onClick = {}
+            onClick = {},
+            onAddClick = {}
         )
     }
 }
@@ -347,7 +365,8 @@ fun AnimeSection(
     animeList: List<Anime>,
     screenPadding: Dp,
     onAnimeClick: (Int) -> Unit,
-    onMoreClick: () -> Unit
+    onMoreClick: () -> Unit,
+    onAddClick: (Anime) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -375,7 +394,8 @@ fun AnimeSection(
                     val anime = animeList[index]
                     AnimeCard(
                         anime = anime,
-                        onClick = { onAnimeClick(anime.id) }
+                        onClick = { onAnimeClick(anime.id) },
+                        onAddClick = onAddClick
                     )
                 }
             }
@@ -536,7 +556,8 @@ fun AnimeSectionRow(title: String, onMoreClick: () -> Unit) {
 @Composable
 fun AnimeCard(
     anime: Anime,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onAddClick: (Anime) -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -564,7 +585,7 @@ fun AnimeCard(
                 modifier = Modifier
                     .align(Alignment.TopStart)
                     .padding(8.dp)
-                    .clickable { /* Handle add to watchlist */ }
+                    .clickable { onAddClick(anime) }
             )
 
             Icon(

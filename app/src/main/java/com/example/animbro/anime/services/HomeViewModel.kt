@@ -20,7 +20,10 @@ data class HomeUiState(
     val error: String? = null,
     val randomAnimeId: Int? = null,
     val isRandomLoading: Boolean = false,
-    val randomError: String? = null
+    val randomError: String? = null,
+    val selectedAnime: Anime? = null,
+    val currentAnimeStatus: String? = null,
+    val isDialogVisible: Boolean = false
 )
 
 @HiltViewModel
@@ -148,4 +151,42 @@ class HomeViewModel @Inject constructor(
     fun onRefresh() {
         loadAllAnimeData()
     }
+
+    fun onAddClick(anime: Anime) {
+        viewModelScope.launch {
+            val status = repository.getAnimeCategory(anime.id)
+
+            _uiState.value = _uiState.value.copy(
+                selectedAnime = anime,
+                currentAnimeStatus = status,
+                isDialogVisible = true
+            )
+        }
+    }
+
+    fun updateAnimeStatus(category: String) {
+        val anime = _uiState.value.selectedAnime ?: return
+
+        viewModelScope.launch {
+            repository.addToWatchList(anime, category)
+            dismissDialog()
+        }
+    }
+
+    fun removeAnimeFromList() {
+        val anime = _uiState.value.selectedAnime ?: return
+
+        viewModelScope.launch {
+            repository.removeFromWatchList(anime.id)
+            dismissDialog()
+        }
+    }
+
+    fun dismissDialog() {
+        _uiState.value = _uiState.value.copy(
+            isDialogVisible = false,
+            selectedAnime = null
+        )
+    }
+
 }

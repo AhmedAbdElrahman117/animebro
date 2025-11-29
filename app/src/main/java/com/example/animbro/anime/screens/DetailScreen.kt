@@ -101,37 +101,6 @@ class DetailActivity : ComponentActivity() {
 //        finish()
     }
 
-    private fun getApiInstance(): Endpoints {
-        val logging = HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BODY
-        }
-
-        val okHttp = OkHttpClient.Builder()
-            .addInterceptor(AuthInterceptor())
-            .addInterceptor(logging)
-            .build()
-
-        val retrofit = Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .client(okHttp)
-            .addConverterFactory(GsonConverterFactory.create(com.google.gson.Gson()))
-            .build()
-
-        return retrofit.create(Endpoints::class.java)
-    }
-
-    private fun getDaoInstance(): WatchListDAO {
-        val db = Room
-            .databaseBuilder(
-                this,
-                com.example.animbro.data.local.AppDatabase::class.java,
-                "animbro_db"
-            )
-            .fallbackToDestructiveMigration()
-            .build()
-
-        return db.watchListDao()
-    }
 
 //    private fun onDetailsClick() {
 //        // TODO: Implement details click later

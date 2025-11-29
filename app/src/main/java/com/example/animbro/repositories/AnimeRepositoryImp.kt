@@ -90,6 +90,10 @@ class AnimeRepositoryImp @Inject constructor(
         }
     }
 
+    override suspend fun getAnimeCategory(id: Int): String? {
+        return db.getAnimeById(id)?.category
+    }
+
     override suspend fun addToWatchList(anime: Anime, category: String) {
         db.insertAnime(anime.toDomain(category))
     }
