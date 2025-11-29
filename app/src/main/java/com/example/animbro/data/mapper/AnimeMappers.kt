@@ -3,6 +3,7 @@ package com.example.animbro.data.mapper
 import androidx.compose.material3.rememberTooltipState
 import com.example.animbro.data.local.entity.WatchListModel
 import com.example.animbro.data.remote.dto.AnimeNodeDTO
+import com.example.animbro.data.remote.dto.MainPictureDTO
 import com.example.animbro.domain.models.Anime
 
 
@@ -33,7 +34,11 @@ fun WatchListModel.toDomain(): Anime {
     return Anime(
         id = id,
         title = title,
-        image = null,
+        image = if (image != null) MainPictureDTO(medium = image, large = image) else null,
+        episodes = episodes,
+        status = status ?: "",
+        score = score,
+        isFavourite = isFavourite
     )
 }
 
@@ -45,6 +50,7 @@ fun Anime.toDomain(category: String): WatchListModel {
         score = score,
         status = status,
         episodes = episodes,
-        category = category
+        category = category,
+        isFavourite = isFavourite
     )
 }

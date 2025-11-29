@@ -3,6 +3,7 @@ package com.example.animbro.repositories
 import android.util.Log
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import com.example.animbro.data.local.dao.WatchListDAO
+import com.example.animbro.data.local.entity.WatchListModel
 import com.example.animbro.data.mapper.toDomain
 import com.example.animbro.data.prefs.PreferencesManager
 import com.example.animbro.data.remote.Endpoints
@@ -95,7 +96,24 @@ class AnimeRepositoryImp @Inject constructor(
     }
 
     override suspend fun addToWatchList(anime: Anime, category: String) {
-        db.insertAnime(anime.toDomain(category))
+        try {
+            val watchListModel = WatchListModel(
+                id = anime.id,
+                title = anime.title,
+                image = anime.image?.medium ?: anime.image?.large,
+                category = category,
+                score = anime.score,
+                status = anime.status,
+                episodes = anime.episodes,
+                isFavourite = anime.isFavourite
+            )
+
+            Log.d("AnimeRepositoryImp", "Adding to watchlist: $watchListModel")
+            db.insertAnime(watchListModel)
+            Log.d("AnimeRepositoryImp", "Successfully added anime: ${anime.title}")
+        } catch (e: Exception) {
+            Log.e("AnimeRepositoryImp", "Error adding to watchlist", e)
+        }
     }
 
     override suspend fun removeFromWatchList(id: Int) {
