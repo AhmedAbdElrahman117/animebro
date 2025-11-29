@@ -105,7 +105,7 @@ class HomeViewModel @Inject constructor(
 
             var validIdFound = false
             var attempts = 0
-            val maxAttempts = 10
+            val maxAttempts = 20
 
             while (!validIdFound && attempts < maxAttempts) {
                 val randomId = (1..60000).random()
@@ -113,7 +113,12 @@ class HomeViewModel @Inject constructor(
                 try {
                     val anime = repository.getAnimeDetails(randomId)
 
-                    if (anime != null) {
+                    if (
+                        anime != null &&
+                        anime.score > 0 &&
+                        anime.rating != "rx" &&
+                        anime.rating != "r+"
+                    ) {
                         validIdFound = true
                         _uiState.value = _uiState.value.copy(
                             isRandomLoading = false,
