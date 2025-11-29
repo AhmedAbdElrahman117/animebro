@@ -11,5 +11,8 @@ data class WatchListModel(
     val title: String,
     val image: String?,
     val category: String,
+    val score: Float,
+    val status: String?,
+    val episodes: Int,
     val isFavourite: Boolean = false
 )

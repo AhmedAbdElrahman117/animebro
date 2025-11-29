@@ -42,6 +42,9 @@ fun Anime.toDomain(category: String): WatchListModel {
         id = id,
         title = title,
         image = image?.medium,
+        score = score,
+        status = status,
+        episodes = episodes,
         category = category
     )
 }

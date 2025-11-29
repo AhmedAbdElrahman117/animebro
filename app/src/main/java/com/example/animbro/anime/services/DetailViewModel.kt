@@ -15,7 +15,9 @@ import javax.inject.Inject
 data class DetailUiState(
     val anime: Anime? = null,
     val isLoading: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
+    val isDialogVisible: Boolean = false,
+    val currentAnimeStatus: String? = null
 )
 
 @HiltViewModel
@@ -46,6 +48,8 @@ class DetailViewModel @Inject constructor(
                         anime = anime,
                         isLoading = false
                     )
+
+                    checkLocalStatus(anime.id)
                 } else {
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
@@ -58,6 +62,47 @@ class DetailViewModel @Inject constructor(
                     error = e.message ?: "An error occurred"
                 )
             }
+        }
+    }
+
+    private fun checkLocalStatus(id: Int) {
+        viewModelScope.launch {
+            val status = repository.getAnimeCategory(id)
+            _uiState.value = _uiState.value.copy(currentAnimeStatus = status)
+        }
+    }
+
+    fun onAddClick() {
+        _uiState.value = _uiState.value.copy(isDialogVisible = true)
+        // Re-check status just in case
+        if (_uiState.value.anime != null) {
+            checkLocalStatus(_uiState.value.anime!!.id)
+        }
+    }
+
+    fun dismissDialog() {
+        _uiState.value = _uiState.value.copy(isDialogVisible = false)
+    }
+
+    fun updateAnimeStatus(category: String) {
+        val anime = _uiState.value.anime ?: return
+        viewModelScope.launch {
+            repository.addToWatchList(anime, category)
+            _uiState.value = _uiState.value.copy(
+                currentAnimeStatus = category,
+                isDialogVisible = false
+            )
+        }
+    }
+
+    fun removeAnimeFromList() {
+        val anime = _uiState.value.anime ?: return
+        viewModelScope.launch {
+            repository.removeFromWatchList(anime.id)
+            _uiState.value = _uiState.value.copy(
+                currentAnimeStatus = null,
+                isDialogVisible = false
+            )
         }
     }
 }

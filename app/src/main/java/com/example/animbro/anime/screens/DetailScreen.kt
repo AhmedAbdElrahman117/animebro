@@ -119,7 +119,14 @@ fun DetailScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    var currentTab by remember { mutableStateOf(DetailTab.DETAILS) }
+    if (uiState.isDialogVisible) {
+        com.example.animbro.anime.components.StatusUpdateDialog(
+            currentStatus = uiState.currentAnimeStatus,
+            onDismissRequest = { viewModel.dismissDialog() },
+            onStatusSelected = { category -> viewModel.updateAnimeStatus(category) },
+            onRemoveClick = { viewModel.removeAnimeFromList() }
+        )
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         when {
@@ -149,7 +156,8 @@ fun DetailScreen(
                 DetailContent(
                     anime = anime,
                     screenPadding = 20.dp,
-                    onCardClick = onAnimeClick
+                    onCardClick = onAnimeClick,
+                    onSavedClick = { viewModel.onAddClick() }
                 )
             }
         }
@@ -160,7 +168,8 @@ fun DetailScreen(
 fun DetailContent(
     anime: Anime,
     screenPadding: Dp = 20.dp,
-    onCardClick: (Int) -> Unit = {}
+    onCardClick: (Int) -> Unit = {},
+    onSavedClick: () -> Unit = {}
 ) {
     var currentTab by remember { mutableStateOf(DetailTab.DETAILS) }
 
@@ -182,7 +191,8 @@ fun DetailContent(
                 }
             },
             selectedTab = currentTab,
-            onTabSelected = { newTab -> currentTab = newTab }
+            onTabSelected = { newTab -> currentTab = newTab },
+            onSavedClick = onSavedClick
         )
 
         when (currentTab) {
@@ -541,7 +551,8 @@ fun AnimePosterSection(
     subtitle: String,
     seasonInfo: String,
     selectedTab: DetailTab,
-    onTabSelected: (DetailTab) -> Unit
+    onTabSelected: (DetailTab) -> Unit,
+    onSavedClick: () -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -577,7 +588,8 @@ fun AnimePosterSection(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 20.dp)
-                .align(Alignment.TopCenter)
+                .align(Alignment.TopCenter),
+            onSavedClick = onSavedClick
         )
 
         Box(
