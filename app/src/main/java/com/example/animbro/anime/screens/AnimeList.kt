@@ -2,6 +2,7 @@ package com.example.animbro.anime.screens
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -22,6 +23,7 @@ import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -93,18 +95,25 @@ fun UserListScreen(
         pageCount = { tabs.size }
     )
     val coroutineScope = rememberCoroutineScope()
+    val uiState by viewModel.uiState.collectAsState()
+
+    // Show StatusUpdateDialog
+    if (uiState.isDialogVisible) {
+        com.example.animbro.anime.components.StatusUpdateDialog(
+            currentStatus = uiState.currentCategory,
+            onDismissRequest = { viewModel.dismissDialog() },
+            onStatusSelected = { category ->
+                viewModel.updateAnimeStatus(category)
+            },
+            onRemoveClick = {
+                viewModel.removeAnimeFromList()
+            }
+        )
+    }
 
     Box(
         modifier = modifier.fillMaxSize()
     ) {
-        // Background Image
-//        Image(
-//            painter = painterResource(id = R.drawable.background),
-//            contentDescription = "Background",
-//            modifier = Modifier.fillMaxSize(),
-//            contentScale = ContentScale.Crop
-//        )
-
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
@@ -152,12 +161,14 @@ fun UserListScreen(
                 val tabName = tabs[page]
                 val animeList by viewModel.getListByCategory(tabName).collectAsState()
 
-                // Only load data for current page
                 key(page) {
                     AnimeListPage(
                         animeList = animeList,
                         category = tabName,
-                        onAnimeClick = onAnimeClick
+                        onAnimeClick = onAnimeClick,
+                        onEditClick = { anime ->
+                            viewModel.onEditClick(anime, tabName)
+                        }
                     )
                 }
             }
@@ -169,8 +180,26 @@ fun UserListScreen(
 fun AnimeListPage(
     animeList: List<Anime>,
     category: String = "",
-    onAnimeClick: (Int) -> Unit
+    onAnimeClick: (Int) -> Unit,
+    onEditClick: (Anime) -> Unit = {}
 ) {
+    // Enhanced Debug log
+    LaunchedEffect(animeList) {
+        Log.d("AnimeListPage", "=== Category: $category, Count: ${animeList.size} ===")
+        animeList.forEachIndexed { index, anime ->
+            Log.d("AnimeListPage", """
+                [$index] Anime Details:
+                - ID: ${anime.id}
+                - Title: ${anime.title}
+                - Image Medium: ${anime.image?.medium}
+                - Score: ${anime.score}
+                - Status: ${anime.status}
+                - Episodes: ${anime.episodes}
+                - isFavourite: ${anime.isFavourite}
+            """.trimIndent())
+        }
+    }
+
     // Hoist painter resources to avoid repeated lookups
     val placeholderPainter = painterResource(id = R.drawable.poster_sample)
     val errorPainter = painterResource(id = R.drawable.poster_sample)
@@ -208,7 +237,7 @@ fun AnimeListPage(
                     },
                     fontSize = 14.sp,
                     color = Color.Black,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                    textAlign = TextAlign.Center
                 )
             }
         }
@@ -226,7 +255,8 @@ fun AnimeListPage(
                     placeholderPainter = placeholderPainter,
                     errorPainter = errorPainter,
                     savedIconPainter = savedIconPainter,
-                    onClick = { onAnimeClick(anime.id) }
+                    onClick = { onAnimeClick(anime.id) },
+                    onEditClick = { onEditClick(anime) }
                 )
             }
         }
@@ -241,12 +271,19 @@ fun UserHeader() {
             .padding(16.dp)
     ) {
         // App Logo
-        Banner(
-            height = 24.dp,
+        // Banner(
+        //     height = 24.dp,
+        //     modifier = Modifier
+        //         .fillMaxWidth()
+        //         .padding(top = 20.dp)
+        //         .align(Alignment.TopCenter)
+        // )
+        Image(
+            painter = painterResource(id = R.drawable.animebro_logo),
+            contentDescription = "App Logo",
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 20.dp)
-                .align(Alignment.TopCenter)
+                .height(40.dp)
+                .align(Alignment.Center)
         )
 
     }
@@ -258,7 +295,8 @@ fun AnimeListItem(
     placeholderPainter: androidx.compose.ui.graphics.painter.Painter,
     errorPainter: androidx.compose.ui.graphics.painter.Painter,
     savedIconPainter: androidx.compose.ui.graphics.painter.Painter,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onEditClick: () -> Unit = {}
 ) {
     Card(
         modifier = Modifier
@@ -280,7 +318,7 @@ fun AnimeListItem(
                     .fillMaxHeight()
             ) {
                 AsyncImage(
-                    model = anime.image?.large ?: anime.image?.medium,
+                    model = anime.image?.medium,
                     contentDescription = anime.title,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop,
@@ -307,7 +345,7 @@ fun AnimeListItem(
                     overflow = TextOverflow.Ellipsis
                 )
 
-                // Additional Info
+                // EP and Status
                 Column(
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
@@ -315,7 +353,7 @@ fun AnimeListItem(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Text(
-                            text = "Episodes: ${anime.episodes}",
+                            text = "Episodes: ${if (anime.episodes > 0) anime.episodes else "N/A"}",
                             fontSize = 12.sp,
                             color = Color.Gray
                         )
@@ -325,7 +363,7 @@ fun AnimeListItem(
                             color = Color.Gray
                         )
                         Text(
-                            text = anime.status,
+                            text = if (anime.status.isNotEmpty()) anime.status else "Unknown",
                             fontSize = 12.sp,
                             color = Color.Gray
                         )
@@ -343,7 +381,7 @@ fun AnimeListItem(
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            text = if (anime.score != null && anime.score > 0) anime.score.toString() else "N/A",
+                            text = if (anime.score > 0) String.format("%.1f", anime.score) else "N/A",
                             fontSize = 13.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = Color.Black
@@ -354,7 +392,7 @@ fun AnimeListItem(
 
             // Edit Status Button
             IconButton(
-                onClick = { /* TODO: Show status edit dialog */ },
+                onClick = onEditClick,
                 modifier = Modifier
                     .align(Alignment.CenterVertically)
                     .padding(end = 8.dp)
