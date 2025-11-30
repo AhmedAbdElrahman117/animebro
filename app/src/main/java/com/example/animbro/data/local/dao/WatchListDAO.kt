@@ -22,4 +22,8 @@ interface WatchListDAO {
 
     @Query("SELECT * FROM watchlist_table WHERE id = :id")
     suspend fun getAnimeById(id: Int): WatchListModel?
+
+    @Query("SELECT * FROM watchlist_table WHERE isFavourite = 1")
+    suspend fun getFavouriteAnime(): List<WatchListModel>
+
 }

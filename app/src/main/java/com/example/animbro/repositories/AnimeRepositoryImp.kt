@@ -92,7 +92,12 @@ class AnimeRepositoryImp @Inject constructor(
     }
 
     override suspend fun getAnimeCategory(id: Int): String? {
-        return db.getAnimeById(id)?.category
+        val myAnime = db.getAnimeById(id)
+
+        if (!(myAnime?.category == null || myAnime.category == ""))
+            return db.getAnimeById(id)?.category
+
+        return null
     }
 
     override suspend fun addToWatchList(anime: Anime, category: String) {
@@ -115,8 +120,30 @@ class AnimeRepositoryImp @Inject constructor(
     override suspend fun removeFromWatchList(id: Int) {
         val anime = db.getAnimeById(id)
 
-        if (anime != null)
-            db.deleteAnime(anime)
+        if (anime == null)
+            return
+
+        db.deleteAnime(anime)
+
+        if (anime.isFavourite) {
+            db.insertAnime(
+                WatchListModel(
+                    id = anime.id,
+                    title = anime.title,
+                    image = anime.image,
+                    category = "",
+                    score = anime.score,
+                    episodes = anime.episodes,
+                    isFavourite = true,
+                    status = anime.status
+                )
+            )
+        }
+
+    }
+
+    override suspend fun getUserFavouriteAnime(): List<Anime> {
+        return db.getFavouriteAnime().map { it.toDomain() }
     }
 
     override suspend fun isAnimeFavourite(id: Int): Boolean {

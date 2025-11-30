@@ -15,6 +15,7 @@ interface AnimeRepository {
     suspend fun getAnimeCategory(id: Int): String?
     suspend fun addToWatchList(anime: Anime, category: String)
     suspend fun removeFromWatchList(id: Int)
+    suspend fun getUserFavouriteAnime(): List<Anime>
 
     suspend fun isAnimeFavourite(id: Int): Boolean
     suspend fun toggleFavourite(anime: Anime)
