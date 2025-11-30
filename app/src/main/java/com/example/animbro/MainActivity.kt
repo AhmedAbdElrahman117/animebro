@@ -162,7 +162,12 @@ class MainActivity : ComponentActivity() {
                                     {
                                         isLoading = false;
                                         Toast.makeText(context, "Success", Toast.LENGTH_LONG).show()
-                                        context.startActivity(Intent(context, HomeActivity::class.java))
+                                        context.startActivity(
+                                            Intent(
+                                                context,
+                                                HomeActivity::class.java
+                                            )
+                                        )
                                         finish()
 
                                     },
@@ -200,44 +205,6 @@ class MainActivity : ComponentActivity() {
 
     }
 
-    private fun notificationHanlder(): ActivityResultLauncher<String> {
-        val handler = registerForActivityResult(ActivityResultContracts.RequestPermission()) {
-            if (it) {
-                sendNotificationMain()
-            } else {
-
-            }
-        }
-        return handler
-    }
-
-    private fun notificationChannel() {
-        val channel =
-            NotificationChannel("30", "Notifications", NotificationManager.IMPORTANCE_DEFAULT)
-        channel.description = "Main Notifications"
-        val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-        manager.createNotificationChannel(channel)
-    }
-
-    @SuppressLint("MissingPermission")
-    private fun sendNotificationMain() {
-        val bitmap = BitmapFactory.decodeResource(resources, R.drawable.animebro_logo)
-        val builder = NotificationCompat.Builder(this, "30")
-        //val i = Intent(this,AnyActivity::class.java)
-        //intent to open the desired (home or favourite etc..)
-//        val pendingintent = PendingIntent.getActivity(this
-//            ,90
-//            ,i
-//            , PendingIntent.FLAG_MUTABLE)
-        builder.setSmallIcon(R.drawable.animebro_logo)
-            .setContentTitle("What's New")
-            .setContentText("See if something came up !!")
-            .setAutoCancel(true)
-            .setStyle(NotificationCompat.BigPictureStyle().bigPicture(bitmap))
-        NotificationManagerCompat
-            .from(this)
-            .notify(10, builder.build())
-    }
 
     override fun onStart() {
         super.onStart()

@@ -17,6 +17,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AnimBro">
         <activity
+            android:name=".anime.screens.ProfileActivity"
+            android:exported="false" />
+        <activity
             android:name=".auth.screens.VerifyEmailSent"
             android:exported="false"
             android:label="@string/title_activity_verify_email_sent"
