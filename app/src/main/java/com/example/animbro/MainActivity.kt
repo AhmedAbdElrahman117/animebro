@@ -20,6 +20,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,6 +39,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.example.animbro.auth.screens.SignUp
+import com.example.animbro.anime.screens.ThemeManager
 import com.example.animbro.navigation.AppNavigation
 import com.example.animbro.ui.theme.AnimBroTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -52,7 +54,9 @@ class MainActivity : ComponentActivity() {
         notificationChannel()
 
         setContent {
-            AnimBroTheme {
+            val themeManager = remember { ThemeManager(this) }
+            val isDarkTheme by themeManager.themeFlow.collectAsState(initial = themeManager.isDarkMode())
+            AnimBroTheme(darkTheme = isDarkTheme) {
                 AppNavigation()
             }
         }

@@ -44,6 +44,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.animbro.domain.models.Anime
 import androidx.compose.ui.text.style.TextAlign
 import dagger.hilt.android.AndroidEntryPoint
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.ui.res.painterResource
+
 
 
 import androidx.navigation.compose.rememberNavController
@@ -268,19 +272,13 @@ fun AnimeListPage(
 
 @Composable
 fun UserHeader() {
+    val isDarkTheme = isSystemInDarkTheme()
     Box(
         modifier = Modifier
             .fillMaxWidth()
+            .background(if (!isDarkTheme) Color.Black else Color.Transparent)
             .padding(16.dp)
     ) {
-        // App Logo
-        // Banner(
-        //     height = 24.dp,
-        //     modifier = Modifier
-        //         .fillMaxWidth()
-        //         .padding(top = 20.dp)
-        //         .align(Alignment.TopCenter)
-        // )
         Image(
             painter = painterResource(id = R.drawable.animebro_logo),
             contentDescription = "App Logo",
@@ -288,7 +286,6 @@ fun UserHeader() {
                 .height(40.dp)
                 .align(Alignment.Center)
         )
-
     }
 }
 

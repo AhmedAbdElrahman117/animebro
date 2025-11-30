@@ -17,6 +17,7 @@ import com.example.animbro.anime.screens.DetailScreen
 import com.example.animbro.anime.screens.HomeScreen
 import com.example.animbro.anime.screens.SearchScreen
 import com.example.animbro.anime.screens.UserListScreen
+import com.example.animbro.anime.screens.ProfileScreen
 import com.example.animbro.anime.services.AnimeListViewModel
 import com.example.animbro.anime.services.DetailViewModel
 import com.example.animbro.anime.services.HomeViewModel
@@ -156,6 +157,21 @@ fun AppNavigation() {
                     onAnimeClick = { animeId ->
                         navController.navigate(Screen.AnimeDetails.createRoute(animeId))
                     }
+                )
+            }
+        }
+
+        composable(Screen.Profile.route) {
+            Scaffold(
+                bottomBar = {
+                    BottomNavigationBar(
+                        navController = navController,
+                        currentRoute = Screen.Profile.route
+                    )
+                }
+            ) { paddingValues ->
+                ProfileScreen(
+                    modifier = Modifier.padding(paddingValues)
                 )
             }
         }

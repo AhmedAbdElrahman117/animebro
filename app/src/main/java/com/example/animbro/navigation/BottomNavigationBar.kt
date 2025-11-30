@@ -6,6 +6,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
@@ -22,8 +23,9 @@ sealed class BottomNavItem(
     val title: String
 ) {
     object Home : BottomNavItem(Screen.Home.route, Icons.Default.Home, "Home")
-    object Search : BottomNavItem(Screen.Search.route, Icons.Default.Search, "Search")
+//    object Search : BottomNavItem(Screen.Search.route, Icons.Default.Search, "Search")
     object AnimeList : BottomNavItem(Screen.AnimeList.route, Icons.Default.List, "My List")
+    object Profile : BottomNavItem(Screen.Profile.route, Icons.Default.Person, "Profile")
 }
 
 @Composable
@@ -33,8 +35,9 @@ fun BottomNavigationBar(
 ) {
     val items = listOf(
         BottomNavItem.Home,
-        BottomNavItem.Search,
-        BottomNavItem.AnimeList
+//        BottomNavItem.Search,
+        BottomNavItem.AnimeList,
+        BottomNavItem.Profile
     )
 
     NavigationBar(
