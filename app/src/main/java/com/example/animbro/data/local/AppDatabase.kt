@@ -12,4 +12,7 @@ import com.example.animbro.data.local.entity.WatchListModel
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun watchListDao(): WatchListDAO
+    abstract fun favoriteDao(): FavoriteDao
+
+
 }
