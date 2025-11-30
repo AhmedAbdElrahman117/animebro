@@ -21,7 +21,8 @@ import com.example.animbro.domain.models.Anime
 fun AnimeCard(
     anime: Anime,
     onClick: () -> Unit,
-    onAddClick: (Anime) -> Unit
+    onAddClick: (Anime) -> Unit,
+    onFavClick: (Anime) -> Unit = {}
 ) {
     Card(
         modifier = Modifier
@@ -61,7 +62,7 @@ fun AnimeCard(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(8.dp)
-                    .clickable { /* Handle favorite */ }
+                    .clickable { onFavClick(anime) }
             )
 
             if (anime.rank != null && anime.rank > 0) {

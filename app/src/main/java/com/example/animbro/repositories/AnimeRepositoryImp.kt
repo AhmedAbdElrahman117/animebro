@@ -142,8 +142,10 @@ class AnimeRepositoryImp @Inject constructor(
 
     }
 
-    override suspend fun getUserFavouriteAnime(): List<Anime> {
-        return db.getFavouriteAnime().map { it.toDomain() }
+    override fun getUserFavouriteAnime(): Flow<List<Anime>> {
+        return db.getFavouriteAnime().map { entities ->
+            entities.map { it.toDomain() }
+        }
     }
 
     override suspend fun isAnimeFavourite(id: Int): Boolean {

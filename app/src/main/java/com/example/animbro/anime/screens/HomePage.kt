@@ -112,9 +112,7 @@ class HomeActivity : ComponentActivity() {
 
 @Composable
 fun HeaderSection(
-    onSearchClick: () -> Unit,
-    onRandomAnimeClick: () -> Unit,
-    isRandomLoading: Boolean
+    onSearchClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -148,33 +146,6 @@ fun HeaderSection(
             }
         }
 
-        Spacer(modifier = Modifier.width(12.dp))
-
-        // Random Anime Button
-        IconButton(
-            onClick = {
-                if (!isRandomLoading) {
-                    onRandomAnimeClick()
-                }
-            },
-            modifier = Modifier
-                .size(50.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(MaterialTheme.colorScheme.primaryContainer)
-        ) {
-            if (isRandomLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(24.dp),
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            } else {
-                Icon(
-                    painter = painterResource(R.drawable.ic_dice),
-                    contentDescription = "Random Anime",
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            }
-        }
     }
 }
 
@@ -259,9 +230,7 @@ fun HomeScreen(
                     // Header Section
                     item {
                         HeaderSection(
-                            onSearchClick = onSearchClick,
-                            onRandomAnimeClick = { viewModel.findRandomAnime() },
-                            isRandomLoading = uiState.isRandomLoading
+                            onSearchClick = onSearchClick
                         )
                     }
                     item {
@@ -269,9 +238,37 @@ fun HomeScreen(
                             viewModel = viewModel,
                             screenPadding = screenPadding,
                             onAnimeClick = onAnimeClick,
-                            onMoreClick = onMoreClick
+
                         )
                     }
+                }
+            }
+        }
+
+        // Floating Action Button for Random Anime
+        if (!uiState.isLoading && uiState.error == null) {
+            FloatingActionButton(
+                onClick = {
+                    if (!uiState.isRandomLoading) {
+                        viewModel.findRandomAnime()
+                    }
+                },
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(16.dp),
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+            ) {
+                if (uiState.isRandomLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                } else {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_dice),
+                        contentDescription = "Random Anime"
+                    )
                 }
             }
         }
@@ -283,7 +280,6 @@ fun HomeScreenContent(
     viewModel: HomeViewModel,
     screenPadding: Dp = 20.dp,
     onAnimeClick: (Int) -> Unit = {},
-    onMoreClick: (String) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -338,106 +334,6 @@ fun HomeScreenContent(
     }
 }
 
-
-// Preview Functions
-//@Preview(showBackground = true, showSystemUi = true)
-//@Composable
-//fun HomeScreenPreview() {
-//    MaterialTheme {
-//        HomeScreen(
-//            viewModel = PreviewHomeViewModel(),
-//            onAnimeClick = {},
-//            onMoreClick = {}
-//        )
-//    }
-//}
-
-@Preview(showBackground = true)
-@Composable
-fun AnimeSectionPreview() {
-    MaterialTheme {
-        AnimeSection(
-            title = "Trending",
-            animeList = getSampleAnimeList(),
-            screenPadding = 20.dp,
-            onAnimeClick = {},
-            onAddClick = {}
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun AnimeCardPreview() {
-    MaterialTheme {
-        AnimeCard(
-            anime = getSampleAnime(),
-            onClick = {},
-            onAddClick = {}
-        )
-    }
-}
-
-@Preview(showBackground = true, widthDp = 400)
-@Composable
-fun PosterSectionPreview() {
-    MaterialTheme {
-        PosterSection(
-            anime = getSampleAnime(),
-            onDetailsClick = {},
-            onTrailerClick = {}
-        )
-    }
-}
-
-
-// Preview Helper Functions
-private fun getSampleAnime() = Anime(
-    id = 1,
-    title = "Attack on Titan",
-    image = MainPictureDTO(
-        medium = "https://cdn.myanimelist.net/images/anime/10/47347.jpg",
-        large = "https://cdn.myanimelist.net/images/anime/10/47347l.jpg"
-    ),
-    rank = 1,
-    status = "Finished Airing",
-    episodes = 25,
-    rating = "R - 17+",
-    score = 8.5.toFloat(),
-    popularity = 1,
-    duration = 24,
-    startDate = "2013-04-07",
-    endDate = "2013-09-29",
-    description = "Centuries ago, mankind was slaughtered to near extinction by monstrous humanoid creatures called titans, forcing humans to hide in fear behind enormous concentric walls.",
-    isFavourite = false
-)
-
-private fun getSampleAnimeList() = listOf(
-    getSampleAnime().copy(id = 1, title = "Attack on Titan", rank = 1),
-    getSampleAnime().copy(id = 2, title = "Fullmetal Alchemist", rank = 2),
-    getSampleAnime().copy(id = 3, title = "Death Note", rank = 3),
-    getSampleAnime().copy(id = 4, title = "One Punch Man", rank = 4),
-    getSampleAnime().copy(id = 5, title = "Steins;Gate", rank = 5)
-)
-
-// Preview ViewModel - Creates a mock ViewModel with sample data
-//private fun PreviewHomeViewModel(): HomeViewModel {
-//    val mockRepository = object : com.example.animbro.domain.repository.AnimeRepository {
-//        override suspend fun getTopRatedAnime(limit: Int) = getSampleAnimeList()
-//        override suspend fun getPopularAnime(limit: Int) = getSampleAnimeList()
-//        override suspend fun getUpcomingAnime(limit: Int) = getSampleAnimeList()
-//        override suspend fun getFavouritesAnime(limit: Int) = getSampleAnimeList()
-//        override suspend fun searchAnime(query: String) = getSampleAnimeList()
-//        override suspend fun getAnimeDetails(id: Int) = getSampleAnime()
-//        override fun getWatchListByCategory(category: String) =
-//            MutableStateFlow(getSampleAnimeList())
-//
-//        override suspend fun addToWatchList(anime: Anime, category: String) {}
-//        override suspend fun removeFromWatchList(id: Int) {}
-//    }
-//
-//    return HomeViewModel(mockRepository)
-//}
 
 @Composable
 fun AnimeSection(
@@ -625,5 +521,107 @@ fun AnimeSectionRow(title: String) {
 
     }
 }
+
+
+
+// Preview Functions
+//@Preview(showBackground = true, showSystemUi = true)
+//@Composable
+//fun HomeScreenPreview() {
+//    MaterialTheme {
+//        HomeScreen(
+//            viewModel = PreviewHomeViewModel(),
+//            onAnimeClick = {},
+//            onMoreClick = {}
+//        )
+//    }
+//}
+
+@Preview(showBackground = true)
+@Composable
+fun AnimeSectionPreview() {
+    MaterialTheme {
+        AnimeSection(
+            title = "Trending",
+            animeList = getSampleAnimeList(),
+            screenPadding = 20.dp,
+            onAnimeClick = {},
+            onAddClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun AnimeCardPreview() {
+    MaterialTheme {
+        AnimeCard(
+            anime = getSampleAnime(),
+            onClick = {},
+            onAddClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400)
+@Composable
+fun PosterSectionPreview() {
+    MaterialTheme {
+        PosterSection(
+            anime = getSampleAnime(),
+            onDetailsClick = {},
+            onTrailerClick = {}
+        )
+    }
+}
+
+
+// Preview Helper Functions
+private fun getSampleAnime() = Anime(
+    id = 1,
+    title = "Attack on Titan",
+    image = MainPictureDTO(
+        medium = "https://cdn.myanimelist.net/images/anime/10/47347.jpg",
+        large = "https://cdn.myanimelist.net/images/anime/10/47347l.jpg"
+    ),
+    rank = 1,
+    status = "Finished Airing",
+    episodes = 25,
+    rating = "R - 17+",
+    score = 8.5.toFloat(),
+    popularity = 1,
+    duration = 24,
+    startDate = "2013-04-07",
+    endDate = "2013-09-29",
+    description = "Centuries ago, mankind was slaughtered to near extinction by monstrous humanoid creatures called titans, forcing humans to hide in fear behind enormous concentric walls.",
+    isFavourite = false
+)
+
+private fun getSampleAnimeList() = listOf(
+    getSampleAnime().copy(id = 1, title = "Attack on Titan", rank = 1),
+    getSampleAnime().copy(id = 2, title = "Fullmetal Alchemist", rank = 2),
+    getSampleAnime().copy(id = 3, title = "Death Note", rank = 3),
+    getSampleAnime().copy(id = 4, title = "One Punch Man", rank = 4),
+    getSampleAnime().copy(id = 5, title = "Steins;Gate", rank = 5)
+)
+
+// Preview ViewModel - Creates a mock ViewModel with sample data
+//private fun PreviewHomeViewModel(): HomeViewModel {
+//    val mockRepository = object : com.example.animbro.domain.repository.AnimeRepository {
+//        override suspend fun getTopRatedAnime(limit: Int) = getSampleAnimeList()
+//        override suspend fun getPopularAnime(limit: Int) = getSampleAnimeList()
+//        override suspend fun getUpcomingAnime(limit: Int) = getSampleAnimeList()
+//        override suspend fun getFavouritesAnime(limit: Int) = getSampleAnimeList()
+//        override suspend fun searchAnime(query: String) = getSampleAnimeList()
+//        override suspend fun getAnimeDetails(id: Int) = getSampleAnime()
+//        override fun getWatchListByCategory(category: String) =
+//            MutableStateFlow(getSampleAnimeList())
+//
+//        override suspend fun addToWatchList(anime: Anime, category: String) {}
+//        override suspend fun removeFromWatchList(id: Int) {}
+//    }
+//
+//    return HomeViewModel(mockRepository)
+//}
 
 
