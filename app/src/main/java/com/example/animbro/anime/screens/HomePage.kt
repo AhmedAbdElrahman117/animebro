@@ -219,6 +219,7 @@ fun HomeScreen(
                     CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                 }
             }
+
             uiState.error != null -> {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -250,6 +251,7 @@ fun HomeScreen(
                     }
                 }
             }
+
             else -> {
                 LazyColumn(
                     modifier = Modifier
@@ -306,7 +308,8 @@ fun HomeScreenContent(
             animeList = uiState.trendingAnime,
             screenPadding = screenPadding,
             onAnimeClick = onAnimeClick,
-            onAddClick = { anime -> viewModel.onAddClick(anime) }
+            onAddClick = { anime -> viewModel.onAddClick(anime) },
+            onFavClick = { anime -> viewModel.onFavoriteClick(anime) }
         )
 
         // Top Ranked Section
@@ -315,7 +318,8 @@ fun HomeScreenContent(
             animeList = uiState.topRankedAnime,
             screenPadding = screenPadding,
             onAnimeClick = onAnimeClick,
-            onAddClick = { anime -> viewModel.onAddClick(anime) }
+            onAddClick = { anime -> viewModel.onAddClick(anime) },
+            onFavClick = { anime -> viewModel.onFavoriteClick(anime) }
         )
 
         // Upcoming Section
@@ -324,7 +328,9 @@ fun HomeScreenContent(
             animeList = uiState.upcomingAnime,
             screenPadding = screenPadding,
             onAnimeClick = onAnimeClick,
-            onAddClick = { anime -> viewModel.onAddClick(anime) }
+            onAddClick = { anime -> viewModel.onAddClick(anime) },
+            onFavClick = { anime -> viewModel.onFavoriteClick(anime) }
+
         )
 
         // Favourite Anime Section
@@ -333,7 +339,8 @@ fun HomeScreenContent(
             animeList = uiState.favouriteAnime,
             screenPadding = screenPadding,
             onAnimeClick = onAnimeClick,
-            onAddClick = { anime -> viewModel.onAddClick(anime) }
+            onAddClick = { anime -> viewModel.onAddClick(anime) },
+            onFavClick = { anime -> viewModel.onFavoriteClick(anime) }
         )
     }
 }
@@ -361,7 +368,8 @@ fun AnimeSectionPreview() {
             animeList = getSampleAnimeList(),
             screenPadding = 20.dp,
             onAnimeClick = {},
-            onAddClick = {}
+            onAddClick = {},
+            onFavClick = {}
         )
     }
 }
@@ -373,7 +381,8 @@ fun AnimeCardPreview() {
         AnimeCard(
             anime = getSampleAnime(),
             onClick = {},
-            onAddClick = {}
+            onAddClick = {},
+            onFavClick = {}
         )
     }
 }
@@ -445,7 +454,8 @@ fun AnimeSection(
     animeList: List<Anime>,
     screenPadding: Dp,
     onAnimeClick: (Int) -> Unit,
-    onAddClick: (Anime) -> Unit
+    onAddClick: (Anime) -> Unit,
+    onFavClick: (Anime) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -473,7 +483,8 @@ fun AnimeSection(
                     AnimeCard(
                         anime = anime,
                         onClick = { onAnimeClick(anime.id) },
-                        onAddClick = onAddClick
+                        onAddClick = onAddClick,
+                        onFavClick = onFavClick
                     )
                 }
             }

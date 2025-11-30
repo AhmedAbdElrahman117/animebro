@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
 data class HomeUiState(
@@ -170,6 +171,33 @@ class HomeViewModel @Inject constructor(
             isDialogVisible = false,
             selectedAnime = null
         )
+    }
+
+    fun onFavoriteClick(anime: Anime) {
+        viewModelScope.launch {
+            repository.toggleFavourite(anime)
+
+            _uiState.update { currentState ->
+                currentState.copy(
+                    trendingAnime = currentState.trendingAnime.map {
+                        if (it.id == anime.id) it.copy(isFavourite = !it.isFavourite) else it
+                    },
+                    topRankedAnime = currentState.topRankedAnime.map {
+                        if (it.id == anime.id) it.copy(isFavourite = !it.isFavourite) else it
+                    },
+                    upcomingAnime = currentState.upcomingAnime.map {
+                        if (it.id == anime.id) it.copy(isFavourite = !it.isFavourite) else it
+                    },
+                    favouriteAnime = if (anime.isFavourite) {
+                        currentState.favouriteAnime.filter { it.id != anime.id }
+                    } else {
+                        currentState.favouriteAnime + anime.copy(isFavourite = true)
+                    }
+                )
+            }
+
+            loadFavouriteAnime()
+        }
     }
 
 }

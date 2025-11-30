@@ -9,14 +9,21 @@ import com.example.animbro.data.prefs.PreferencesManager
 import com.example.animbro.data.remote.Endpoints
 import com.example.animbro.domain.models.Anime
 import com.example.animbro.domain.repository.AnimeRepository
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
+import kotlin.collections.map
 
 class AnimeRepositoryImp @Inject constructor(
     val api: Endpoints,
     val db: WatchListDAO,
-    val preferencesManager: PreferencesManager
+    val preferencesManager: PreferencesManager,
+    private val auth: FirebaseAuth,
+    private val firestore: FirebaseFirestore
 ) : AnimeRepository {
 
     suspend fun getAnimeRanking(
@@ -115,6 +122,33 @@ class AnimeRepositoryImp @Inject constructor(
         } else anime.toDomain(category)
 
         db.insertAnime(entityToSave)
+
+        val userId = auth.currentUser?.uid
+
+        if (userId != null) {
+            try {
+                val data = hashMapOf(
+                    "id" to entityToSave.id,
+                    "title" to entityToSave.title,
+                    "image" to entityToSave.image,
+                    "category" to category,
+                    "score" to entityToSave.score,
+                    "episodes" to entityToSave.episodes,
+                    "status" to entityToSave.status
+                )
+
+                firestore.collection("users")
+                    .document(userId)
+                    .collection("watchlist")
+                    .document(anime.id.toString())
+                    .set(data, SetOptions.merge())
+                    .await()
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+
     }
 
     override suspend fun removeFromWatchList(id: Int) {
@@ -140,10 +174,31 @@ class AnimeRepositoryImp @Inject constructor(
             )
         }
 
+        val userId = auth.currentUser?.uid
+
+        if (userId != null) {
+            try {
+                val docRef = firestore.collection("users")
+                    .document(userId)
+                    .collection("watchlist")
+                    .document(id.toString())
+
+                if (anime.isFavourite) {
+                    docRef.update("category", "").await()
+                } else {
+                    docRef.delete().await()
+                }
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 
-    override suspend fun getUserFavouriteAnime(): List<Anime> {
-        return db.getFavouriteAnime().map { it.toDomain() }
+    override fun getUserFavouriteAnime(): Flow<List<Anime>> {
+        return db.getFavouriteAnime().map {
+            it.map { entity -> entity.toDomain() }
+        }
     }
 
     override suspend fun isAnimeFavourite(id: Int): Boolean {
@@ -159,6 +214,28 @@ class AnimeRepositoryImp @Inject constructor(
             ?: anime.toDomain(category = "").copy(isFavourite = true)
 
         db.insertAnime(entityToSave)
+
+        val userId = auth.currentUser?.uid
+        if (userId != null) {
+            try {
+                val data = hashMapOf(
+                    "id" to anime.id,
+                    "title" to anime.title,
+                    "image" to (anime.image?.large ?: anime.image?.medium ?: ""),
+                    "is_favourite" to newFavoriteState,
+                    "last_updated" to System.currentTimeMillis()
+                )
+
+                firestore.collection("users")
+                    .document(userId)
+                    .collection("watchlist")
+                    .document(anime.id.toString())
+                    .set(data, SetOptions.merge())
+                    .await()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 
     override fun isDarkMode(): Flow<Boolean> {
