@@ -9,7 +9,7 @@ val DarkPrimaryText = Color(0xFFCEC1B3)
 val DarkSecondaryText = Color(0xFF547489)
 val DarkPrimaryButton = Color(0xFF9B6FD2)
 val DarkSecondaryButton = Color(0xFF3C9093)
-val DarkError = Color(0xFFC41036)
+val DarkError = Color(0xFFFF0000)
 
 // Light Mode Colors
 val LightBackground = Color(0xFFCEC1B3)

@@ -1,6 +1,10 @@
 package com.example.animbro.anime.screens
 
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.*
+import androidx.compose.ui.platform.LocalContext
+import com.example.animbro.anime.components.AnimeCard
 
 import android.content.Intent
 import androidx.compose.foundation.BorderStroke
@@ -8,7 +12,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.material3.*
+
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -20,7 +24,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
@@ -42,12 +45,14 @@ import androidx.compose.material3.Scaffold
 import com.example.animbro.ui.theme.AnimBroTheme
 import com.example.animbro.anime.services.HomeViewModel
 import com.example.animbro.anime.components.Banner
-import androidx.compose.material.icons.Icons
+
 import androidx.compose.ui.draw.clip
 import androidx.compose.material.icons.filled.Search
 import com.example.animbro.navigation.BottomNavigationBar
 import androidx.activity.viewModels
+import androidx.compose.foundation.Image
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
 import com.example.animbro.anime.components.StatusUpdateDialog
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -65,6 +70,11 @@ class HomeActivity : ComponentActivity() {
         setContent {
             AnimBroTheme {
                 val navController = rememberNavController()
+                val uiState by viewModel.uiState.collectAsState()
+                val context = LocalContext.current
+
+
+
                 Scaffold(
                     bottomBar = {
                         BottomNavigationBar(
@@ -72,22 +82,22 @@ class HomeActivity : ComponentActivity() {
                             currentRoute = "home"
                         )
                     }
-
                 ) { paddingValues ->
-
                     Box(modifier = Modifier.padding(paddingValues)) {
                         HomeScreen(
                             viewModel = viewModel,
-                            screenPadding = 20.dp,
                             onAnimeClick = { animeId ->
                                 navigateToDetail(animeId)
+                            },
+                            onSearchClick = {
+                                val intent = Intent(context, SearchActivity::class.java)
+                                context.startActivity(intent)
                             },
                             onMoreClick = { section ->
                                 // TODO: Navigate to section list screen
                             }
                         )
                     }
-
                 }
             }
         }
@@ -97,7 +107,62 @@ class HomeActivity : ComponentActivity() {
         val intent = Intent(this, DetailActivity::class.java).apply {
             putExtra("animeId", animeId)
         }
-        startActivity(intent)
+    }
+}
+
+@Composable
+fun HeaderSection(
+    onSearchClick: () -> Unit,
+    onRandomAnimeClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 10.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Search Bar (Clickable Box)
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .height(50.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .clickable { onSearchClick() }
+                .padding(horizontal = 16.dp),
+            contentAlignment = Alignment.CenterStart
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = "Search",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Search anime...",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.width(12.dp))
+
+        // Random Anime Button
+        IconButton(
+            onClick = onRandomAnimeClick,
+            modifier = Modifier
+                .size(50.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(MaterialTheme.colorScheme.primaryContainer)
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_dice),
+                contentDescription = "Random Anime",
+                tint = MaterialTheme.colorScheme.onPrimaryContainer
+            )
+        }
     }
 }
 
@@ -106,9 +171,11 @@ fun HomeScreen(
     viewModel: HomeViewModel,
     screenPadding: Dp = 20.dp,
     onAnimeClick: (Int) -> Unit = {},
-    onMoreClick: (String) -> Unit = {}
+    onMoreClick: (String) -> Unit = {},
+    onSearchClick: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
 
     LaunchedEffect(uiState.randomAnimeId) {
         uiState.randomAnimeId?.let { id ->
@@ -130,120 +197,138 @@ fun HomeScreen(
         )
     }
 
-    Scaffold(
-        floatingActionButton = {
-            FloatingActionButton(onClick = {
-                if (!uiState.isRandomLoading) {
-                    viewModel.findRandomAnime()
-                }
-            }) {
-                if (uiState.isRandomLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(24.dp),
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                } else {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_dice),
-                        contentDescription = "Random"
-                    )
+    Box(modifier = Modifier.fillMaxSize()) {
+        when {
+            uiState.isLoading -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                 }
             }
-        }
-    ) { paddingValues ->
-
-        Box(modifier = Modifier.fillMaxSize()) {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(
-                    bottom = paddingValues.calculateBottomPadding()
-                ),
-                verticalArrangement = Arrangement.spacedBy(20.dp)
-            ) {
-                item {
-                    if (uiState.trendingAnime.isNotEmpty()) {
-                        val featuredAnime = uiState.trendingAnime.first()
-                        PosterSection(
-                            anime = featuredAnime,
-                            onDetailsClick = { onAnimeClick(featuredAnime.id) },
-                            onTrailerClick = { /* Handle trailer */ }
+            uiState.error != null -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Warning,
+                            contentDescription = "Error",
+                            tint = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.size(64.dp)
                         )
-                    }
-                }
-                // Trending Section
-                item {
-                    AnimeSection(
-                        title = "Trending",
-                        animeList = uiState.trendingAnime,
-                        screenPadding = screenPadding,
-                        onAnimeClick = onAnimeClick,
-                        onMoreClick = { onMoreClick("Trending") },
-                        onAddClick = { anime -> viewModel.onAddClick(anime) }
-                    )
-                }
-
-                // Top Ranked Section
-                item {
-                    AnimeSection(
-                        title = "Top Ranked",
-                        animeList = uiState.topRankedAnime,
-                        screenPadding = screenPadding,
-                        onAnimeClick = onAnimeClick,
-                        onMoreClick = { onMoreClick("Top Ranked") },
-                        onAddClick = { anime -> viewModel.onAddClick(anime) }
-                    )
-                }
-
-                // Upcoming Section
-                item {
-                    AnimeSection(
-                        title = "Upcoming",
-                        animeList = uiState.upcomingAnime,
-                        screenPadding = screenPadding,
-                        onAnimeClick = onAnimeClick,
-                        onMoreClick = { onMoreClick("Upcoming") },
-                        onAddClick = { anime -> viewModel.onAddClick(anime) }
-                    )
-                }
-
-                // Favourite Anime Section
-                item {
-                    AnimeSection(
-                        title = "Most Favourite Anime",
-                        animeList = uiState.favouriteAnime,
-                        screenPadding = screenPadding,
-                        onAnimeClick = onAnimeClick,
-                        onMoreClick = { onMoreClick("All Anime") },
-                        onAddClick = { anime -> viewModel.onAddClick(anime) }
-                    )
-                }
-            }
-
-            // Loading indicator
-            if (uiState.isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            }
-
-            // Error message
-            uiState.error?.let { error ->
-                Snackbar(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(16.dp),
-                    action = {
-                        TextButton(onClick = { viewModel.onRefresh() }) {
-                            Text("Retry")
+                        Text(
+                            text = "No Internet Connection",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                        Button(
+                            onClick = { viewModel.onRefresh() },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary
+                            )
+                        ) {
+                            Text("Retry", color = MaterialTheme.colorScheme.onPrimary)
                         }
                     }
+                }
+            }
+            else -> {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.background)
                 ) {
-                    Text(error)
+                    // Header Section
+                    item {
+                        HeaderSection(
+                            onSearchClick = onSearchClick,
+                            onRandomAnimeClick = { viewModel.findRandomAnime() }
+                        )
+                    }
+                    item {
+                        HomeScreenContent(
+                            viewModel = viewModel,
+                            screenPadding = screenPadding,
+                            onAnimeClick = onAnimeClick,
+                            onMoreClick = onMoreClick
+                        )
+                    }
                 }
             }
         }
     }
 }
+
+@Composable
+fun HomeScreenContent(
+    viewModel: HomeViewModel,
+    screenPadding: Dp = 20.dp,
+    onAnimeClick: (Int) -> Unit = {},
+    onMoreClick: (String) -> Unit = {}
+) {
+    val uiState by viewModel.uiState.collectAsState()
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(20.dp)
+    ) {
+        if (uiState.trendingAnime.isNotEmpty()) {
+            val featuredAnime = uiState.trendingAnime.first()
+            PosterSection(
+                anime = featuredAnime,
+                onDetailsClick = { onAnimeClick(featuredAnime.id) },
+                onTrailerClick = { /* Handle trailer */ }
+            )
+        }
+
+        // Trending Section
+        AnimeSection(
+            title = "Trending",
+            animeList = uiState.trendingAnime,
+            screenPadding = screenPadding,
+            onAnimeClick = onAnimeClick,
+            onMoreClick = { onMoreClick("Trending") },
+            onAddClick = { anime -> viewModel.onAddClick(anime) }
+        )
+
+        // Top Ranked Section
+        AnimeSection(
+            title = "Top Ranked",
+            animeList = uiState.topRankedAnime,
+            screenPadding = screenPadding,
+            onAnimeClick = onAnimeClick,
+            onMoreClick = { onMoreClick("Top Ranked") },
+            onAddClick = { anime -> viewModel.onAddClick(anime) }
+        )
+
+        // Upcoming Section
+        AnimeSection(
+            title = "Upcoming",
+            animeList = uiState.upcomingAnime,
+            screenPadding = screenPadding,
+            onAnimeClick = onAnimeClick,
+            onMoreClick = { onMoreClick("Upcoming") },
+            onAddClick = { anime -> viewModel.onAddClick(anime) }
+        )
+
+        // Favourite Anime Section
+        AnimeSection(
+            title = "Most Favourite Anime",
+            animeList = uiState.favouriteAnime,
+            screenPadding = screenPadding,
+            onAnimeClick = onAnimeClick,
+            onMoreClick = { onMoreClick("All Anime") },
+            onAddClick = { anime -> viewModel.onAddClick(anime) }
+        )
+    }
+}
+
 
 // Preview Functions
 //@Preview(showBackground = true, showSystemUi = true)
@@ -436,12 +521,19 @@ fun PosterSection(
                     )
                 )
         )
-        Banner(
-            height = 24.dp,
+//        Banner(
+//            height = 24.dp,
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(top = 20.dp)
+//                .align(Alignment.TopCenter)
+//        )
+        Image(
+            painter = painterResource(id = R.drawable.animebro_logo),
+            contentDescription = "App Logo",
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 20.dp)
-                .align(Alignment.TopCenter)
+                .height(40.dp)
+                .align(Alignment.TopStart)
         )
         // Content
         Box(
@@ -516,12 +608,6 @@ fun PosterSection(
                     Text("Details", color = MaterialTheme.colorScheme.primary)
                 }
 
-                OutlinedButton(
-                    onClick = onTrailerClick,
-                    border = BorderStroke(2.dp, MaterialTheme.colorScheme.onBackground)
-                ) {
-                    Text("Trailer", color = MaterialTheme.colorScheme.primary)
-                }
             }
         }
     }
@@ -550,102 +636,4 @@ fun AnimeSectionRow(title: String, onMoreClick: () -> Unit) {
     }
 }
 
-@Composable
-fun AnimeCard(
-    anime: Anime,
-    onClick: () -> Unit,
-    onAddClick: (Anime) -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .width(140.dp)
-            .height(210.dp)
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(6.dp)
-    ) {
-        Box {
-            // Anime image
-            AsyncImage(
-                model = anime.image?.large ?: anime.image?.medium,
-                contentDescription = anime.title,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop,
-                placeholder = painterResource(R.drawable.poster_sample),
-                error = painterResource(R.drawable.poster_sample)
-            )
-
-            Icon(
-                painter = painterResource(R.drawable.ic_add),
-                contentDescription = "Add",
-                tint = Color.White,
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .padding(8.dp)
-                    .clickable { onAddClick(anime) }
-            )
-
-            Icon(
-                painter = painterResource(
-                    if (anime.isFavourite) R.drawable.fav_ic else R.drawable.fav_ic
-                ),
-                contentDescription = "Favorite",
-                tint = if (anime.isFavourite) Color.Red else Color.White,
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(8.dp)
-                    .clickable { /* Handle favorite */ }
-            )
-
-            if (anime.rank != null && anime.rank > 0) {
-                Surface(
-                    modifier = Modifier
-                        .align(Alignment.BottomStart)
-                        .padding(8.dp),
-                    shape = RoundedCornerShape(4.dp),
-                    color = Color.Black.copy(alpha = 0.7f)
-                ) {
-                    Text(
-                        text = "#${anime.rank}",
-                        color = Color.White,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun SearchBar(onClick: () -> Unit) {
-    val darkBlue = MaterialTheme.colorScheme.onBackground
-
-    Box(
-        modifier = Modifier
-            .width(350.dp)
-            .height(60.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(Color.White)
-            .clickable { onClick() }
-            .padding(horizontal = 12.dp),
-        contentAlignment = Alignment.CenterStart
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                imageVector = Icons.Default.Search,
-                contentDescription = null,
-                tint = darkBlue
-            )
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            Text(
-                text = "                      Search…",
-                color = Color.Gray
-            )
-        }
-    }
-}
 

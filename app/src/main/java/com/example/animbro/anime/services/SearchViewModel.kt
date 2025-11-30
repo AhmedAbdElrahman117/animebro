@@ -18,10 +18,14 @@ class SearchViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(SearchUiState())
     val uiState: StateFlow<SearchUiState> = _uiState
 
+    init {
+        loadDefaultAnime()
+    }
+
     fun search(query: String) {
         viewModelScope.launch {
             if (query.isBlank()) {
-                _uiState.value = _uiState.value.copy(results = emptyList())
+                loadDefaultAnime()
             } else {
                 _uiState.value = _uiState.value.copy(isLoading = true)
                 try {
@@ -30,6 +34,18 @@ class SearchViewModel @Inject constructor(
                 } catch (e: Exception) {
                     _uiState.value = _uiState.value.copy(error = e.message, isLoading = false)
                 }
+            }
+        }
+    }
+
+    private fun loadDefaultAnime() {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true)
+            try {
+                val list = repository.getPopularAnime(limit = 20)
+                _uiState.value = _uiState.value.copy(results = list, isLoading = false)
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(error = e.message, isLoading = false)
             }
         }
     }

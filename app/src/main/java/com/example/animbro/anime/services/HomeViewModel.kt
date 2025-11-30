@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.coroutineScope
 import javax.inject.Inject
 
 data class HomeUiState(
@@ -43,14 +44,12 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
             try {
-                val trendingDeferred = launch { loadTrendingAnime() }
-                val topRankedDeferred = launch { loadTopRankedAnime() }
-                val upcomingDeferred = launch { loadUpcomingAnime() }
-                val favouriteAnimeDeferred = launch { loadFavouriteAnime() }
-                trendingDeferred.join()
-                topRankedDeferred.join()
-                upcomingDeferred.join()
-                favouriteAnimeDeferred.join()
+                coroutineScope {
+                    launch { loadTrendingAnime() }
+                    launch { loadTopRankedAnime() }
+                    launch { loadUpcomingAnime() }
+                    launch { loadFavouriteAnime() }
+                }
                 _uiState.value = _uiState.value.copy(isLoading = false)
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
@@ -62,40 +61,24 @@ class HomeViewModel @Inject constructor(
     }
 
     private suspend fun loadTrendingAnime() {
-        try {
-            val anime = repository.getPopularAnime(limit = 10)
-            _uiState.value = _uiState.value.copy(trendingAnime = anime)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        val anime = repository.getPopularAnime(limit = 10)
+        _uiState.value = _uiState.value.copy(trendingAnime = anime)
     }
 
     private suspend fun loadTopRankedAnime() {
-        try {
-            val anime = repository.getTopRatedAnime(limit = 10)
-            _uiState.value = _uiState.value.copy(topRankedAnime = anime)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        val anime = repository.getTopRatedAnime(limit = 10)
+        _uiState.value = _uiState.value.copy(topRankedAnime = anime)
     }
 
     private suspend fun loadUpcomingAnime() {
-        try {
-            // Using "upcoming" for anime not yet aired
-            val anime = repository.getUpcomingAnime(limit = 10)
-            _uiState.value = _uiState.value.copy(upcomingAnime = anime)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        // Using "upcoming" for anime not yet aired
+        val anime = repository.getUpcomingAnime(limit = 10)
+        _uiState.value = _uiState.value.copy(upcomingAnime = anime)
     }
 
     private suspend fun loadFavouriteAnime() {
-        try {
-            val anime = repository.getFavouritesAnime(limit = 10)
-            _uiState.value = _uiState.value.copy(favouriteAnime = anime)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        val anime = repository.getFavouritesAnime(limit = 10)
+        _uiState.value = _uiState.value.copy(favouriteAnime = anime)
     }
 
     fun findRandomAnime() {

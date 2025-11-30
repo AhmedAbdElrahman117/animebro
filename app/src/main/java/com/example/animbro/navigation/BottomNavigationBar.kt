@@ -38,7 +38,7 @@ fun BottomNavigationBar(
     )
 
     NavigationBar(
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = MaterialTheme.colorScheme.surfaceVariant,
         contentColor = MaterialTheme.colorScheme.primary
     ) {
         items.forEach { item ->
@@ -77,7 +77,7 @@ fun BottomNavigationBar(
     }
 }
 
-@Preview(showBackground = true, name = "Bottom Nav - Home Selected")
+@Preview(showBackground = false, name = "Bottom Nav - Home Selected")
 @Composable
 fun BottomNavigationBarPreview_Home() {
     AnimBroTheme {

@@ -109,6 +109,9 @@ fun AppNavigation() {
                         },
                         onMoreClick = { section ->
                             // TODO: Navigate to section list screen
+                        },
+                        onSearchClick = {
+                            navController.navigate(Screen.Search.route)
                         }
                     )
                 }
