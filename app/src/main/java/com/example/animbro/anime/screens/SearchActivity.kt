@@ -1,5 +1,7 @@
 package com.example.animbro.anime.screens
 
+import androidx.compose.material3.MaterialTheme
+
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -26,27 +28,16 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.room.Room
 import coil.compose.AsyncImage
 import com.example.animbro.R
 import com.example.animbro.anime.services.SearchViewModel
 import com.example.animbro.domain.models.Anime
-import com.example.animbro.repositories.AnimeRepositoryImp
-import com.example.animbro.data.local.dao.WatchListDAO
-import com.example.animbro.data.local.AppDatabase
-import com.example.animbro.data.remote.AuthInterceptor
-import com.example.animbro.data.remote.BASE_URL
-import com.example.animbro.data.remote.Endpoints
 import com.example.animbro.ui.theme.AnimBroTheme
-import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import androidx.compose.ui.res.painterResource
-import com.example.animbro.anime.components.BottomNavigationBar
+import com.example.animbro.navigation.BottomNavigationBar
 import dagger.hilt.android.AndroidEntryPoint
-import dagger.hilt.android.lifecycle.HiltViewModel
+
+import androidx.navigation.compose.rememberNavController
 
 @AndroidEntryPoint
 class SearchActivity : ComponentActivity() {
@@ -58,9 +49,13 @@ class SearchActivity : ComponentActivity() {
 
         setContent {
             AnimBroTheme {
+                val navController = rememberNavController()
                 Scaffold(
                     bottomBar = {
-                        BottomNavigationBar(currentRoute = "search")
+                        BottomNavigationBar(
+                            navController = navController,
+                            currentRoute = "search"
+                        )
                     }
                 ) { paddingValues ->
                     SearchScreen(
@@ -77,13 +72,13 @@ class SearchActivity : ComponentActivity() {
 fun SearchScreen(viewModel: SearchViewModel, modifier: Modifier = Modifier) {
     var query by remember { mutableStateOf("") }
     val results by viewModel.results.collectAsState()
-    val darkBlue = Color(0xFF0A3D62)
+    val darkBlue = MaterialTheme.colorScheme.onBackground
     val context = LocalContext.current
 
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFFF0F0F0))
+            .background(MaterialTheme.colorScheme.background)
             .padding(16.dp)
     ) {
         // Search Bar
@@ -91,7 +86,7 @@ fun SearchScreen(viewModel: SearchViewModel, modifier: Modifier = Modifier) {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(60.dp)
-                .background(Color.White, shape = MaterialTheme.shapes.medium)
+                .background(MaterialTheme.colorScheme.surface, shape = MaterialTheme.shapes.medium)
                 .padding(horizontal = 12.dp),
             contentAlignment = Alignment.CenterStart
         ) {
@@ -105,7 +100,7 @@ fun SearchScreen(viewModel: SearchViewModel, modifier: Modifier = Modifier) {
                 Spacer(modifier = Modifier.width(8.dp))
 
                 Box(modifier = Modifier.fillMaxWidth()) {
-                    if (query.isEmpty()) Text(text = "Search anime...", color = Color.Gray)
+                    if (query.isEmpty()) Text(text = "Search anime...", color = MaterialTheme.colorScheme.onSurfaceVariant)
 
                     BasicTextField(
                         value = query,
@@ -114,7 +109,7 @@ fun SearchScreen(viewModel: SearchViewModel, modifier: Modifier = Modifier) {
                             viewModel.search(it)
                         },
                         singleLine = true,
-                        cursorBrush = SolidColor(darkBlue),
+                        cursorBrush = SolidColor(MaterialTheme.colorScheme.onBackground),
                         textStyle = TextStyle(color = darkBlue, fontWeight = FontWeight.Medium),
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -132,7 +127,7 @@ fun SearchScreen(viewModel: SearchViewModel, modifier: Modifier = Modifier) {
             ) {
                 Text(
                     text = "No results found",
-                    color = Color.Gray,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 16.sp
                 )
             }
@@ -149,11 +144,11 @@ fun SearchScreen(viewModel: SearchViewModel, modifier: Modifier = Modifier) {
                         imageVector = Icons.Default.Search,
                         contentDescription = "Search",
                         modifier = Modifier.size(64.dp),
-                        tint = Color.Gray
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
                         text = "Search for your favorite anime",
-                        color = Color.Gray,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 16.sp
                     )
                 }
@@ -218,7 +213,7 @@ fun AnimeResultCard(anime: Anime, onClick: () -> Unit) {
                     fontSize = 16.sp,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
-                    color = Color(0xFF0A3D62)
+                    color = MaterialTheme.colorScheme.onBackground
                 )
 
                 Column(
@@ -227,12 +222,12 @@ fun AnimeResultCard(anime: Anime, onClick: () -> Unit) {
                     Text(
                         text = "Episodes: ${anime.episodes ?: "N/A"}",
                         fontSize = 12.sp,
-                        color = Color.Gray
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
                         text = "Score: ${if (anime.score > 0) anime.score else "N/A"}",
                         fontSize = 12.sp,
-                        color = Color.Gray
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }

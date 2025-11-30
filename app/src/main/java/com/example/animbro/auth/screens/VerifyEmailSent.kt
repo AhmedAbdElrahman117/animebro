@@ -1,5 +1,7 @@
 package com.example.animbro.auth.screens
 
+import androidx.compose.material3.MaterialTheme
+
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -102,7 +104,7 @@ fun OpenLoginButton(modifier: Modifier = Modifier, context: Context) {
         },
         modifier = modifier,
         colors = ButtonDefaults.buttonColors().copy(
-            containerColor = Color(0xFF16476A)
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
         ),
         elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp),
         shape = RoundedCornerShape(8.dp)
@@ -123,7 +125,7 @@ private fun OpenGmailButton(modifier: Modifier = Modifier, context: Context) {
         },
         modifier = modifier,
         colors = ButtonDefaults.buttonColors().copy(
-            containerColor = Color(0xFF16476A)
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
         ),
         elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp),
         shape = RoundedCornerShape(8.dp)

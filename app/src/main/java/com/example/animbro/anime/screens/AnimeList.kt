@@ -1,5 +1,8 @@
 package com.example.animbro.anime.screens
 
+import androidx.compose.material3.MaterialTheme
+
+
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -23,31 +26,26 @@ import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.animbro.R
-import com.example.animbro.anime.components.BottomNavigationBar
+import com.example.animbro.navigation.BottomNavigationBar
 import com.example.animbro.ui.theme.AnimBroTheme
 import kotlinx.coroutines.launch
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.animbro.anime.components.Banner
 import com.example.animbro.anime.services.AnimeListViewModel
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.animbro.data.local.dao.WatchListDAO
-import com.example.animbro.data.remote.Endpoints
-import com.example.animbro.repositories.AnimeRepositoryImp
 import com.example.animbro.domain.models.Anime
 import androidx.compose.ui.text.style.TextAlign
 import dagger.hilt.android.AndroidEntryPoint
 
+
+import androidx.navigation.compose.rememberNavController
 
 @AndroidEntryPoint
 class AnimeListActivity : ComponentActivity() {
@@ -61,10 +59,14 @@ class AnimeListActivity : ComponentActivity() {
             AnimBroTheme {
 
                 val viewModel: AnimeListViewModel = hiltViewModel()
+                val navController = rememberNavController()
 
                 Scaffold(
                     bottomBar = {
-                        BottomNavigationBar(currentRoute = "animelist")
+                        BottomNavigationBar(
+                            navController = navController,
+                            currentRoute = "animelist"
+                        )
                     }
                 ) { paddingValues ->
                     UserListScreen(
@@ -124,12 +126,12 @@ fun UserListScreen(
             ScrollableTabRow(
                 selectedTabIndex = pagerState.currentPage,
                 containerColor = Color.Transparent,
-                contentColor = Color.Black,
+                contentColor = MaterialTheme.colorScheme.onSurface,
                 edgePadding = 16.dp,
                 indicator = { tabPositions ->
                     TabRowDefaults.SecondaryIndicator(
                         Modifier.tabIndicatorOffset(tabPositions[pagerState.currentPage]),
-                        color = Color(0xFF4A5BFF)
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
             ) {
@@ -146,7 +148,7 @@ fun UserListScreen(
                                 text = tab,
                                 fontSize = 14.sp,
                                 fontWeight = if (pagerState.currentPage == index) FontWeight.Bold else FontWeight.Normal,
-                                color = Color.Black
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                         }
                     )
@@ -221,13 +223,13 @@ fun AnimeListPage(
                     painter = painterResource(id = R.drawable.saved_ic),
                     contentDescription = "Empty List",
                     modifier = Modifier.size(80.dp),
-                    tint = Color.Black
+                    tint = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
                     text = "Nothing here yet!",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.Black
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
                     text = if (category.isNotEmpty()) {
@@ -236,7 +238,7 @@ fun AnimeListPage(
                         "Start adding anime to your list"
                     },
                     fontSize = 14.sp,
-                    color = Color.Black,
+                    color = MaterialTheme.colorScheme.onSurface,
                     textAlign = TextAlign.Center
                 )
             }
@@ -309,7 +311,7 @@ fun AnimeListItem(
         Row(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.White)
+                .background(MaterialTheme.colorScheme.surface)
         ) {
             // Anime Poster
             Box(
@@ -340,8 +342,8 @@ fun AnimeListItem(
                     text = anime.title,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.Black,
-                    maxLines = 2,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
 
@@ -355,17 +357,17 @@ fun AnimeListItem(
                         Text(
                             text = "Episodes: ${if (anime.episodes > 0) anime.episodes else "N/A"}",
                             fontSize = 12.sp,
-                            color = Color.Gray
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
                             text = "•",
                             fontSize = 12.sp,
-                            color = Color.Gray
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
                             text = if (anime.status.isNotEmpty()) anime.status else "Unknown",
                             fontSize = 12.sp,
-                            color = Color.Gray
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
 
@@ -376,15 +378,14 @@ fun AnimeListItem(
                         Icon(
                             imageVector = Icons.Default.Favorite,
                             contentDescription = "Rating",
-                            tint = Color(0xFFFFD700),
+                            tint = MaterialTheme.colorScheme.tertiary,
                             modifier = Modifier.size(16.dp)
                         )
-                        Spacer(modifier = Modifier.width(4.dp))
                         Text(
                             text = if (anime.score > 0) String.format("%.1f", anime.score) else "N/A",
                             fontSize = 13.sp,
                             fontWeight = FontWeight.SemiBold,
-                            color = Color.Black
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
@@ -400,7 +401,7 @@ fun AnimeListItem(
                 Icon(
                     painter = savedIconPainter,
                     contentDescription = "Edit Status",
-                    tint = Color(0xFF4A5BFF),
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(24.dp)
                 )
             }

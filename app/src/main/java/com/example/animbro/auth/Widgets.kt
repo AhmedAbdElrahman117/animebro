@@ -1,5 +1,7 @@
 package com.example.animbro.auth
 
+import androidx.compose.material3.MaterialTheme
+
 import android.app.Activity
 import android.content.Intent
 import androidx.activity.compose.LocalActivity
@@ -77,7 +79,7 @@ fun EmailTextField(
             Icon(
                 Icons.Default.Email,
                 contentDescription = "Email Icon",
-                tint = if (isError) Color(0xFFcc0000) else LocalContentColor.current
+                tint = if (isError) MaterialTheme.colorScheme.error else LocalContentColor.current
             )
         },
         supportingText = if (isError) {
@@ -114,7 +116,7 @@ fun UserNameTextField(
             Icon(
                 Icons.Default.Person,
                 contentDescription = "Email Icon",
-                tint = if (isError) Color(0xFFcc0000) else LocalContentColor.current
+                tint = if (isError) MaterialTheme.colorScheme.error else LocalContentColor.current
             )
         },
         supportingText = if (isError) {
@@ -154,7 +156,7 @@ fun PasswordTextField(
             Icon(
                 Icons.Default.Lock,
                 contentDescription = "Password Icon",
-                tint = if (isError) Color(0xFFcc0000) else LocalContentColor.current
+                tint = if (isError) MaterialTheme.colorScheme.error else LocalContentColor.current
             )
         },
         visualTransformation = if (isShowPassword) VisualTransformation.None
@@ -205,11 +207,11 @@ fun AuthBackground(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(color = Color.Black.copy(alpha = 0.65f)),
+                    .background(color = MaterialTheme.colorScheme.scrim.copy(alpha = 0.65f)),
                 contentAlignment = Alignment.Center
 
             ) {
-                CircularProgressIndicator(color = Color.Blue)
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
             }
     }
 }
@@ -244,9 +246,9 @@ fun Background(modifier: Modifier) {
                     brush = Brush.verticalGradient(
                         colors = listOf(
                             Color.Transparent,
-                            Color.White.copy(alpha = 0.3f),
-                            Color.White.copy(alpha = 0.6f),
-                            Color.White.copy(alpha = 0.97f),
+                            MaterialTheme.colorScheme.surface.copy(alpha = 0.3f),
+                            MaterialTheme.colorScheme.surface.copy(alpha = 0.6f),
+                            MaterialTheme.colorScheme.surface.copy(alpha = 0.97f),
                         )
                     )
                 )
@@ -264,7 +266,7 @@ fun ForegroundLayer(
         modifier = modifier
             .padding(20.dp)
             .fillMaxSize(),
-        colors = CardDefaults.cardColors().copy(containerColor = Color.White.copy(alpha = 0.65f)),
+        colors = CardDefaults.cardColors().copy(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.65f)),
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp),
         shape = RoundedCornerShape(24.dp),
         content = {
@@ -293,7 +295,7 @@ fun Logo(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun CustomDivider() {
+fun CustomDivider(modifier: Modifier) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.padding(vertical = 16.dp, horizontal = 24.dp)
@@ -304,14 +306,14 @@ fun CustomDivider() {
                 .height(1.dp)
                 .fillMaxWidth(),
             colors = CardDefaults.cardColors()
-                .copy(containerColor = Color.Black),
+                .copy(containerColor = MaterialTheme.colorScheme.onBackground),
             elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp),
         ) { }
 
         Text(
             "or",
             modifier = Modifier.padding(horizontal = 12.dp),
-            color = Color(0xFFF9A620),
+            color = MaterialTheme.colorScheme.secondary,
         )
 
         Card(
@@ -320,7 +322,7 @@ fun CustomDivider() {
                 .weight(1f)
                 .fillMaxWidth(),
             colors = CardDefaults.cardColors()
-                .copy(containerColor = Color.Black),
+                .copy(containerColor = MaterialTheme.colorScheme.onBackground),
             elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp),
         ) { }
     }
@@ -347,7 +349,7 @@ fun SignWithGoogleButton(modifier: Modifier = Modifier, label: String) {
         },
         modifier = modifier,
         colors = ButtonDefaults.buttonColors().copy(
-            containerColor = Color(0xFF16476A)
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
         ),
         elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp),
         shape = RoundedCornerShape(8.dp)

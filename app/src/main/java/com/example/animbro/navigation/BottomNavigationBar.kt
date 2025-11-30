@@ -1,9 +1,10 @@
-package com.example.animbro.anime.components
+package com.example.animbro.navigation
+
+import androidx.compose.material3.MaterialTheme
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -12,7 +13,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.example.animbro.navigation.Screen
 import com.example.animbro.ui.theme.AnimBroTheme
 
 
@@ -38,8 +38,8 @@ fun BottomNavigationBar(
     )
 
     NavigationBar(
-        containerColor = Color.White,
-        contentColor = Color(0xFF4A5BFF)
+        containerColor = MaterialTheme.colorScheme.surface,
+        contentColor = MaterialTheme.colorScheme.primary
     ) {
         items.forEach { item ->
             NavigationBarItem(
@@ -66,11 +66,11 @@ fun BottomNavigationBar(
                     }
                 },
                 colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = Color(0xFF4A5BFF),
-                    selectedTextColor = Color(0xFF4A5BFF),
-                    unselectedIconColor = Color.Gray,
-                    unselectedTextColor = Color.Gray,
-                    indicatorColor = Color(0xFF4A5BFF).copy(alpha = 0.1f)
+                    selectedIconColor = MaterialTheme.colorScheme.primary,
+                    selectedTextColor = MaterialTheme.colorScheme.primary,
+                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
                 )
             )
         }

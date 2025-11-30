@@ -27,7 +27,7 @@ fun StatusUpdateDialog(
             Text(
                 text = "Add to List",
                 fontWeight = FontWeight.Bold,
-                color = colorResource(id = R.color.text_blue)
+                color = MaterialTheme.colorScheme.primary
             )
         },
         text = {
@@ -44,7 +44,7 @@ fun StatusUpdateDialog(
                             selected = (category == currentStatus),
                             onClick = { onStatusSelected(category) },
                             colors = RadioButtonDefaults.colors(
-                                selectedColor = colorResource(id = R.color.text_blue)
+                                selectedColor = MaterialTheme.colorScheme.primary
                             )
                         )
                         Spacer(modifier = Modifier.width(8.dp))
@@ -70,7 +70,7 @@ fun StatusUpdateDialog(
         },
         dismissButton = {
             TextButton(onClick = onDismissRequest) {
-                Text("Cancel", color = colorResource(id = R.color.text_blue))
+                Text("Cancel", color = MaterialTheme.colorScheme.primary)
             }
         }
     )

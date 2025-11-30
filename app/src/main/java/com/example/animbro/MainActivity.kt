@@ -1,43 +1,30 @@
 package com.example.animbro
 
+import androidx.compose.material3.MaterialTheme
+
 import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.PendingIntent
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.os.Bundle
-import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
@@ -48,164 +35,33 @@ import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import com.example.animbro.anime.screens.HomeActivity
-import com.example.animbro.auth.AuthBackground
-import com.example.animbro.auth.CustomDivider
-import com.example.animbro.auth.EmailTextField
-import com.example.animbro.auth.PasswordTextField
-import com.example.animbro.auth.SignWithGoogleButton
-import com.example.animbro.auth.repository.ErrorCause
-import com.example.animbro.auth.repository.LoginRepository
-import com.example.animbro.auth.screens.ForgotPassword
 import com.example.animbro.auth.screens.SignUp
+import com.example.animbro.navigation.AppNavigation
 import com.example.animbro.ui.theme.AnimBroTheme
-import com.google.firebase.auth.FirebaseAuth
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        // Setup notification channel
+        notificationChannel()
+
         setContent {
-            var email by rememberSaveable { mutableStateOf("") };
-            var password by rememberSaveable { mutableStateOf("") };
-            var emailError by rememberSaveable { mutableStateOf("") };
-            var passwordError by rememberSaveable { mutableStateOf("") };
-            var cause by rememberSaveable { mutableStateOf(ErrorCause.none) };
-            val context = LocalContext.current;
-            var isLoading by remember { mutableStateOf(false) }
-
             AnimBroTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    AuthBackground(Modifier.padding(innerPadding), isLoading = isLoading) {
-                        Text(
-                            "Login",
-                            modifier = Modifier
-                                .padding(vertical = 24.dp)
-                                .align(Alignment.CenterHorizontally),
-                            fontSize = 28.sp,
-                            fontWeight = FontWeight.Bold
-                        );
-                        EmailTextField(
-                            value = email,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp),
-                            isError = cause == ErrorCause.email,
-                            errorText = emailError,
-                            onValueChange = {
-                                email = it
-                            }
-                        )
-                        PasswordTextField(
-                            value = password,
-                            label = "Password",
-                            placeHolder = "Enter your Password",
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 16.dp),
-                            isError = cause == ErrorCause.password,
-                            errorText = passwordError,
-                            onValueChange = {
-                                password = it;
-                            }
-                        )
-                        ForgotPassword(
-                            Modifier
-                                .padding(
-                                    top = 4.dp, bottom = 20.dp,
-                                    start = 20.dp, end = 20.dp
-                                )
-                                .clickable(onClick = {
-                                    context.startActivity(
-                                        Intent(
-                                            context,
-                                            ForgotPassword::class.java
-                                        )
-                                    );
-
-                                }),
-                        );
-                        LoginButton(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 28.dp),
-                            email = email,
-                            password = password,
-                            onClick = {
-                                cause = ErrorCause.none;
-                                emailError = ""
-                                passwordError = ""
-                                isLoading = true;
-                                LoginRepository().login(
-                                    email,
-                                    password,
-                                    { message, errorCause ->
-                                        cause = errorCause;
-                                        isLoading = false;
-                                        when (errorCause) {
-                                            ErrorCause.email -> {
-                                                emailError = message;
-                                            };
-                                            ErrorCause.password -> {
-                                                passwordError = message;
-                                            };
-                                            else -> {
-                                                cause = ErrorCause.none;
-                                                emailError = ""
-                                                passwordError = ""
-                                            }
-                                        }
-                                    },
-                                    {
-                                        isLoading = false;
-                                        Toast.makeText(context, "Success", Toast.LENGTH_LONG).show()
-                                        context.startActivity(Intent(context, HomeActivity::class.java))
-                                        finish()
-
-                                    },
-                                    {
-                                        isLoading = false;
-                                        Toast.makeText(
-                                            context,
-                                            it,
-                                            Toast.LENGTH_LONG
-                                        ).show()
-                                    },
-                                );
-
-                            },
-                        )
-                        CustomDivider()
-                        SignWithGoogleButton(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 28.dp),
-                            "Login With Google"
-                        )
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 28.dp)
-                        ) {
-                            SignUpText(modifier = Modifier.align(alignment = Alignment.Center))
-                        }
-
-                    }
-                }
+                AppNavigation()
             }
         }
-
     }
 
     private fun notificationHanlder(): ActivityResultLauncher<String> {
         val handler = registerForActivityResult(ActivityResultContracts.RequestPermission()) {
             if (it) {
                 sendNotificationMain()
-            } else {
-
             }
         }
         return handler
@@ -223,12 +79,6 @@ class MainActivity : ComponentActivity() {
     private fun sendNotificationMain() {
         val bitmap = BitmapFactory.decodeResource(resources, R.drawable.animebro_logo)
         val builder = NotificationCompat.Builder(this, "30")
-        //val i = Intent(this,AnyActivity::class.java)
-        //intent to open the desired (home or favourite etc..)
-//        val pendingintent = PendingIntent.getActivity(this
-//            ,90
-//            ,i
-//            , PendingIntent.FLAG_MUTABLE)
         builder.setSmallIcon(R.drawable.animebro_logo)
             .setContentTitle("What's New")
             .setContentText("See if something came up !!")
@@ -238,19 +88,14 @@ class MainActivity : ComponentActivity() {
             .from(this)
             .notify(10, builder.build())
     }
-
-    override fun onStart() {
-        super.onStart()
-        if (FirebaseAuth.getInstance().currentUser != null) {
-            startActivity(Intent(this, HomeActivity::class.java))
-            finish()
-        }
-    }
 }
 
 
 @Composable
 fun SignUpText(modifier: Modifier = Modifier) {
+    val errorColor = MaterialTheme.colorScheme.error
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val onSurfaceVariant = MaterialTheme.colorScheme.onSurfaceVariant
     val context = LocalActivity.current;
 
     val text by remember {
@@ -263,11 +108,11 @@ fun SignUpText(modifier: Modifier = Modifier) {
                         "s",
                         styles = TextLinkStyles(
                             style = SpanStyle(
-                                color = Color(0xFFBF092F),
+                                color = errorColor,
                                 textDecoration = TextDecoration.Underline,
                             ),
                             pressedStyle = SpanStyle(
-                                background = Color.Gray.copy(alpha = 0.2f)
+                                background = onSurfaceVariant.copy(alpha = 0.2f)
                             ),
                         )
                     ) {
@@ -296,7 +141,7 @@ fun LoginButton(
     ElevatedButton(
         modifier = modifier,
         colors = ButtonDefaults.buttonColors().copy(
-            containerColor = Color(0xFF5683D4)
+            containerColor = MaterialTheme.colorScheme.primary
         ),
         shape = RoundedCornerShape(8.dp),
         elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp),
@@ -312,11 +157,12 @@ fun LoginButton(
 
 @Composable
 fun ForgotPassword(modifier: Modifier = Modifier) {
+    val primaryColor = MaterialTheme.colorScheme.primary
     val text by remember {
         mutableStateOf(buildAnnotatedString {
             withStyle(
                 SpanStyle(
-                    color = Color(0xFF5683D4),
+                    color = primaryColor,
                     textDecoration = TextDecoration.Underline,
                     fontWeight = FontWeight.W700, fontSize = 16.sp,
                 )

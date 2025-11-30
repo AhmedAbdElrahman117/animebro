@@ -1,5 +1,7 @@
 package com.example.animbro.auth.screens
 
+import androidx.compose.material3.MaterialTheme
+
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
@@ -187,7 +189,9 @@ class SignUp : ComponentActivity() {
                                 },
                             );
                         }
-                        CustomDivider()
+                        CustomDivider(
+                            modifier = Modifier.padding(vertical = 20.dp, horizontal = 28.dp)
+                        )
                         SignWithGoogleButton(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -207,7 +211,7 @@ fun SignupButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
     ElevatedButton(
         modifier = modifier,
         colors = ButtonDefaults.buttonColors().copy(
-            containerColor = Color(0xFF5683D4)
+            containerColor = MaterialTheme.colorScheme.primary
         ),
         shape = RoundedCornerShape(8.dp),
         elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp),

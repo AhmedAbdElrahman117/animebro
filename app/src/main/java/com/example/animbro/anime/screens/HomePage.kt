@@ -1,5 +1,7 @@
 package com.example.animbro.anime.screens
 
+import androidx.compose.material3.MaterialTheme
+
 import android.content.Intent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
@@ -29,7 +31,6 @@ import coil.compose.AsyncImage
 import com.example.animbro.domain.models.Anime
 import com.example.animbro.R
 import androidx.compose.ui.tooling.preview.Preview
-import kotlinx.coroutines.flow.MutableStateFlow
 import com.example.animbro.data.remote.dto.MainPictureDTO
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -38,28 +39,20 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.remember
-import com.example.animbro.data.local.dao.WatchListDAO
-import com.example.animbro.data.remote.Endpoints
-import com.example.animbro.repositories.AnimeRepositoryImp
 import com.example.animbro.ui.theme.AnimBroTheme
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.animbro.anime.services.HomeViewModel
 import com.example.animbro.anime.components.Banner
-import com.example.animbro.data.remote.AuthInterceptor
-import com.example.animbro.data.remote.BASE_URL
 import androidx.compose.material.icons.Icons
 import androidx.compose.ui.draw.clip
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.ui.platform.LocalContext
-import com.example.animbro.anime.components.BottomNavigationBar
-import android.inputmethodservice.Keyboard.Row
+import com.example.animbro.navigation.BottomNavigationBar
 import androidx.activity.viewModels
 import androidx.compose.runtime.LaunchedEffect
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.animbro.anime.components.StatusUpdateDialog
 import dagger.hilt.android.AndroidEntryPoint
 
+
+import androidx.navigation.compose.rememberNavController
 
 @AndroidEntryPoint
 class HomeActivity : ComponentActivity() {
@@ -71,9 +64,13 @@ class HomeActivity : ComponentActivity() {
 
         setContent {
             AnimBroTheme {
+                val navController = rememberNavController()
                 Scaffold(
                     bottomBar = {
-                        BottomNavigationBar(currentRoute = "home")
+                        BottomNavigationBar(
+                            navController = navController,
+                            currentRoute = "home"
+                        )
                     }
 
                 ) { paddingValues ->
@@ -143,7 +140,7 @@ fun HomeScreen(
                 if (uiState.isRandomLoading) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(24.dp),
-                        color = Color.White
+                        color = MaterialTheme.colorScheme.onBackground
                     )
                 } else {
                     Icon(
@@ -383,7 +380,7 @@ fun AnimeSection(
                 text = "No anime available",
                 modifier = Modifier.padding(vertical = 8.dp),
                 style = MaterialTheme.typography.bodyMedium,
-                color = Color.Gray
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         } else {
             LazyRow(
@@ -432,9 +429,9 @@ fun PosterSection(
                     Brush.verticalGradient(
                         colors = listOf(
                             Color.Transparent,
-                            Color.White.copy(alpha = 0.0f),
-                            Color.White.copy(alpha = 0.6f),
-                            Color.White.copy(alpha = 1.0f)
+                            MaterialTheme.colorScheme.surface.copy(alpha = 0.0f),
+                            MaterialTheme.colorScheme.surface.copy(alpha = 0.6f),
+                            MaterialTheme.colorScheme.surface.copy(alpha = 1.0f)
                         )
                     )
                 )
@@ -514,16 +511,16 @@ fun PosterSection(
             ) {
                 OutlinedButton(
                     onClick = onDetailsClick,
-                    border = BorderStroke(1.dp, colorResource(id = R.color.text_blue))
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
                 ) {
-                    Text("Details", color = colorResource(id = R.color.text_blue))
+                    Text("Details", color = MaterialTheme.colorScheme.primary)
                 }
 
                 OutlinedButton(
                     onClick = onTrailerClick,
-                    border = BorderStroke(2.dp, Color.White)
+                    border = BorderStroke(2.dp, MaterialTheme.colorScheme.onBackground)
                 ) {
-                    Text("Trailer", color = colorResource(id = R.color.text_blue))
+                    Text("Trailer", color = MaterialTheme.colorScheme.primary)
                 }
             }
         }
@@ -541,7 +538,7 @@ fun AnimeSectionRow(title: String, onMoreClick: () -> Unit) {
             title,
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
-            color = colorResource(R.color.text_blue)
+            color = MaterialTheme.colorScheme.primary
         )
         Text(
             "more",
@@ -623,7 +620,7 @@ fun AnimeCard(
 
 @Composable
 fun SearchBar(onClick: () -> Unit) {
-    val darkBlue = Color(0xFF0A3D62)
+    val darkBlue = MaterialTheme.colorScheme.onBackground
 
     Box(
         modifier = Modifier

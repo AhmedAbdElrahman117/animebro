@@ -1,5 +1,7 @@
 package com.example.animbro.anime.components
 
+import androidx.compose.material3.MaterialTheme
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -72,7 +74,7 @@ fun Banner(
 @Preview(showBackground = true)
 @Composable
 private fun BannerPreview() {
-    Surface(color = Color.Black) {
+    Surface(color = MaterialTheme.colorScheme.background) {
         Banner(height = 20.dp)
     }
 }

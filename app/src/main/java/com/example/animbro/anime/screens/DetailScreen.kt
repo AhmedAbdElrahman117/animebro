@@ -1,5 +1,6 @@
 package com.example.animbro.anime.screens
 
+import android.annotation.SuppressLint
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -36,6 +37,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -72,6 +74,7 @@ enum class DetailTab {
 @AndroidEntryPoint
 class DetailActivity : ComponentActivity() {
     private val viewModel: DetailViewModel by viewModels()
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -177,7 +180,7 @@ fun DetailContent(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .background(Color.White)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         AnimePosterSection(
             imageUrl = anime.image?.large ?: anime.image?.medium,
@@ -222,7 +225,7 @@ fun DetailsBody(
                 text = "Description",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
-                color = colorResource(id = R.color.text_blue)
+                color = MaterialTheme.colorScheme.primary
             )
 
             Spacer(Modifier.height(8.dp))
@@ -246,7 +249,7 @@ fun DetailsBody(
                     modifier = Modifier
                         .padding(top = 6.dp)
                         .clickable { isExpanded = !isExpanded },
-                    color = colorResource(id = R.color.text_blue),
+                    color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.SemiBold,
                 )
             }
@@ -299,7 +302,7 @@ fun DetailsBody(
                     text = "Genres",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
-                    color = colorResource(id = R.color.text_blue)
+                    color = MaterialTheme.colorScheme.primary
                 )
 
                 Spacer(Modifier.height(8.dp))
@@ -323,7 +326,7 @@ fun DetailsBody(
                     text = "Gallery",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
-                    color = colorResource(id = R.color.text_blue)
+                    color = MaterialTheme.colorScheme.primary
                 )
 
                 Spacer(Modifier.height(8.dp))
@@ -353,7 +356,7 @@ fun DetailsBody(
                     text = "Recommendations",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
-                    color = colorResource(id = R.color.text_blue)
+                    color = MaterialTheme.colorScheme.primary
                 )
 
                 Spacer(Modifier.height(8.dp))
@@ -384,7 +387,7 @@ fun TrailersBody(videos: List<VideoDTO>?) {
                 .padding(40.dp),
             contentAlignment = Alignment.Center
         ) {
-            Text("No trailers available", color = Color.Gray)
+            Text("No trailers available", color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     } else {
         Column(
@@ -473,13 +476,13 @@ fun StatCard(title: String, value: String, modifier: Modifier = Modifier) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.bodySmall,
-                color = Color.Gray
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             Text(
                 text = value,
                 style = MaterialTheme.typography.headlineSmall,
-                color = colorResource(id = R.color.text_blue),
+                color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold
             )
         }
@@ -490,7 +493,7 @@ fun StatCard(title: String, value: String, modifier: Modifier = Modifier) {
 fun GenreChip(text: String) {
     Surface(
         shape = RoundedCornerShape(16.dp),
-        color = colorResource(id = R.color.text_blue),
+        color = MaterialTheme.colorScheme.primary,
         modifier = Modifier
             .height(32.dp)
             .wrapContentWidth()
@@ -501,7 +504,7 @@ fun GenreChip(text: String) {
         ) {
             Text(
                 text = text,
-                color = colorResource(id = R.color.white),
+                color = MaterialTheme.colorScheme.onPrimary,
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 13.sp
             )
@@ -535,7 +538,7 @@ fun RecommendationCard(
             Icon(
                 painter = painterResource(id = R.drawable.fav_ic),
                 contentDescription = "fav",
-                tint = Color.White,
+                tint = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(6.dp)
@@ -575,9 +578,9 @@ fun AnimePosterSection(
                     Brush.verticalGradient(
                         colors = listOf(
                             Color.Transparent,
-                            Color.White.copy(alpha = 0.0f),
-                            Color.White.copy(alpha = 0.6f),
-                            Color.White.copy(alpha = 1.0f)
+                            MaterialTheme.colorScheme.surface.copy(alpha = 0.0f),
+                            MaterialTheme.colorScheme.surface.copy(alpha = 0.6f),
+                            MaterialTheme.colorScheme.surface.copy(alpha = 1.0f)
                         )
                     )
                 )
@@ -622,18 +625,46 @@ fun AnimePosterSection(
             ) {
                 OutlinedButton(
                     onClick = { onTabSelected(DetailTab.DETAILS) },
-                    border = BorderStroke(2.dp, colorResource(R.color.text_blue))
+                    border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
                 ) {
-                    Text("Details", color = colorResource(id = R.color.text_blue))
+                    Text("Details", color = MaterialTheme.colorScheme.primary)
                 }
 
                 OutlinedButton(
                     onClick = { onTabSelected(DetailTab.TRAILERS) },
-                    border = BorderStroke(2.dp, colorResource(R.color.text_blue))
+                    border = BorderStroke(2.dp, MaterialTheme.colorScheme.onBackground)
                 ) {
-                    Text("Trailer", color = colorResource(id = R.color.text_blue))
+                    Text("Trailer", color = MaterialTheme.colorScheme.primary)
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun DetailScreenPreview() {
+    AnimBroTheme {
+        DetailContent(
+            anime = com.example.animbro.domain.models.Anime(
+                id = 1,
+                title = "Demon Slayer: Kimetsu no Yaiba",
+                image = null,
+                rank = 1,
+                status = "Finished Airing",
+                episodes = 26,
+                rating = "R - 17+ (violence & profanity)",
+                score = 8.54f,
+                popularity = 1,
+                duration = 24,
+                startDate = "Apr 6, 2019",
+                description = "It is the Taisho Period in Japan. Tanjiro, a kindhearted boy who sells charcoal for a living, finds his family slaughtered by a demon. To make matters worse, his younger sister Nezuko, the sole survivor, has been transformed into a demon herself. Though devastated by this grim reality, Tanjiro resolves to become a “demon slayer” so that he can turn his sister back into a human, and kill the demon that massacred his family.",
+                genres = listOf(
+                    com.example.animbro.data.remote.dto.GenreDTO(1, "Action"),
+                    com.example.animbro.data.remote.dto.GenreDTO(2, "Demons")
+                ),
+                isFavourite = true
+            )
+        )
     }
 }
