@@ -1,6 +1,7 @@
 package com.example.animbro.anime.screens
 
 import androidx.compose.material3.MaterialTheme
+import com.example.animbro.anime.components.AnimeListItem
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -71,9 +72,18 @@ class SearchActivity : ComponentActivity() {
 @Composable
 fun SearchScreen(viewModel: SearchViewModel, modifier: Modifier = Modifier) {
     var query by remember { mutableStateOf("") }
-    val results by viewModel.results.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
     val darkBlue = MaterialTheme.colorScheme.onBackground
     val context = LocalContext.current
+
+    if (uiState.isDialogVisible) {
+        com.example.animbro.anime.components.StatusUpdateDialog(
+            currentStatus = uiState.currentAnimeStatus,
+            onDismissRequest = { viewModel.dismissDialog() },
+            onStatusSelected = { category -> viewModel.updateAnimeStatus(category) },
+            onRemoveClick = { viewModel.removeAnimeFromList() }
+        )
+    }
 
     Column(
         modifier = modifier
@@ -120,7 +130,7 @@ fun SearchScreen(viewModel: SearchViewModel, modifier: Modifier = Modifier) {
         Spacer(modifier = Modifier.height(16.dp))
 
         // Results List
-        if (results.isEmpty() && query.isNotEmpty()) {
+        if (uiState.results.isEmpty() && query.isNotEmpty() && !uiState.isLoading) {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
@@ -158,76 +168,20 @@ fun SearchScreen(viewModel: SearchViewModel, modifier: Modifier = Modifier) {
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier.fillMaxSize()
             ) {
-                items(results) { anime ->
-                    AnimeResultCard(anime = anime, onClick = {
-                        val intent = android.content.Intent(context, DetailActivity::class.java)
-                        intent.putExtra("animeId", anime.id)
-                        context.startActivity(intent)
-                    })
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun AnimeResultCard(anime: Anime, onClick: () -> Unit) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(120.dp)
-            .clickable { onClick() },
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        shape = MaterialTheme.shapes.medium
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(8.dp)
-        ) {
-            // صورة الأنمي
-            AsyncImage(
-                model = anime.image?.medium ?: anime.image?.large,
-                contentDescription = anime.title,
-                modifier = Modifier
-                    .size(100.dp)
-                    .clip(MaterialTheme.shapes.medium),
-                contentScale = ContentScale.Crop,
-                placeholder = painterResource(R.drawable.poster_sample),
-                error = painterResource(R.drawable.poster_sample)
-            )
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            // النصوص (العنوان والوصف)
-            Column(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .weight(1f)
-                    .padding(vertical = 4.dp),
-                verticalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = anime.title,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(2.dp)
-                ) {
-                    Text(
-                        text = "Episodes: ${anime.episodes ?: "N/A"}",
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        text = "Score: ${if (anime.score > 0) anime.score else "N/A"}",
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                items(uiState.results) { anime ->
+                    AnimeListItem(
+                        anime = anime,
+                        placeholderPainter = painterResource(R.drawable.poster_sample),
+                        errorPainter = painterResource(R.drawable.poster_sample),
+                        savedIconPainter = painterResource(R.drawable.saved_ic),
+                        onClick = {
+                            val intent = android.content.Intent(context, DetailActivity::class.java)
+                            intent.putExtra("animeId", anime.id)
+                            context.startActivity(intent)
+                        },
+                        onEditClick = {
+                            viewModel.onEditClick(anime)
+                        }
                     )
                 }
             }

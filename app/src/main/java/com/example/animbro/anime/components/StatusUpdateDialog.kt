@@ -11,6 +11,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.animbro.R
+import androidx.compose.ui.tooling.preview.Preview
+import com.example.animbro.ui.theme.AnimBroTheme
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.ui.draw.shadow
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.ui.graphics.Color
 
 @Composable
 fun StatusUpdateDialog(
@@ -31,27 +41,46 @@ fun StatusUpdateDialog(
             )
         },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 categories.forEach { category ->
+                    val isSelected = (category == currentStatus)
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { onStatusSelected(category) } // Clicking row selects it
-                            .padding(vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        RadioButton(
-                            selected = (category == currentStatus),
-                            onClick = { onStatusSelected(category) },
-                            colors = RadioButtonDefaults.colors(
-                                selectedColor = MaterialTheme.colorScheme.primary
+                            .shadow(
+                                elevation = if (isSelected) 4.dp else 0.dp,
+                                shape = RoundedCornerShape(8.dp)
                             )
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
+                            .background(
+                                color = if (isSelected) MaterialTheme.colorScheme.surface else Color.Transparent,
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                            .border(
+                                width = if (isSelected) 1.dp else 0.dp,
+                                color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                            .clickable { onStatusSelected(category) }
+                            .padding(vertical = 12.dp, horizontal = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        if (isSelected) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = "Selected",
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                        }
+
                         Text(
                             text = category,
                             fontSize = 16.sp,
-                            fontWeight = if (category == currentStatus) FontWeight.Bold else FontWeight.Normal
+                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                            textAlign = TextAlign.Center
                         )
                     }
                 }
@@ -74,4 +103,17 @@ fun StatusUpdateDialog(
             }
         }
     )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun StatusUpdateDialogPreview() {
+    AnimBroTheme {
+        StatusUpdateDialog(
+            currentStatus = "Watching",
+            onDismissRequest = {},
+            onStatusSelected = {},
+            onRemoveClick = {}
+        )
+    }
 }
