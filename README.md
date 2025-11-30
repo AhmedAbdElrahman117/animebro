@@ -1,21 +1,23 @@
 # AnimBro
 
-AnimBro is a Kotlin-based Android application for anime fans. It provides a complete experience to discover, track, and manage anime, with integrated profiles, watchlists, favorites, ratings, and notifications. The app connects to the [MyAnimeList v2 API](https://myanimelist.net/apiconfig/references/api/v2#operation/manga_manga_id_my_list_status_put) to keep your anime lists up to date.
+[![Stars](https://img.shields.io/github/stars/AhmedAbdElrahman117/animebro?style=flat-square)](https://github.com/AhmedAbdElrahman117/animebro/stargazers) [![License](https://img.shields.io/github/license/AhmedAbdElrahman117/animebro?style=flat-square)](https://github.com/AhmedAbdElrahman117/animebro/blob/main/LICENSE) [![Kotlin](https://img.shields.io/badge/Kotlin-7f52ff?logo=kotlin&logoColor=white&style=flat-square)](https://kotlinlang.org/) [![Android](https://img.shields.io/badge/Android-3ddc84?logo=android&logoColor=white&style=flat-square)](https://developer.android.com/)
+
+AnimBro is a Kotlin-based Android application for anime fans. It provides a complete experience to discover, track, and manage anime, with integrated profiles, watchlists, favorites, ratings, and notifications.
 
 ---
 
 ## Table of Contents
 
-- [Features](#features)
-  - [Profile](#profile)
-  - [WatchList](#watchlist)
-  - [Comments & Ratings](#comments--ratings)
-  - [Favorites](#favorites)
-  - [My Anime List Integration](#my-anime-list-integration)
-  - [Anime Details](#anime-details)
-  - [Home Page](#home-page)
-  - [Notifications](#notifications)
-- [Screens](#screens)
+- [✨ Features](#features)
+  - [👤 Profile](#profile)
+  - [📺 WatchList](#watchlist)
+  - [💬 Comments & Ratings](#comments--ratings)
+  - [❤️ Favorites](#favorites)
+  - [🔗 My Anime List Integration](#my-anime-list-integration)
+  - [ℹ️ Anime Details](#anime-details)
+  - [🏠 Home Page](#home-page)
+  - [🔔 Notifications](#notifications)
+- [🖥️ Screens](#screens)
   - [Login Screen](#login-screen)
   - [Sign Up Screen](#sign-up-screen)
   - [Forgot Password Screen](#forgot-password-screen)
@@ -24,17 +26,17 @@ AnimBro is a Kotlin-based Android application for anime fans. It provides a comp
   - [Wishlist Screen](#wishlist-screen)
   - [Favourite Screen](#favourite-screen)
   - [Profile Screen](#profile-screen)
-- [Tech Stack](#tech-stack)
-- [Getting Started](#getting-started)
-- [Project Structure](#project-structure)
-- [Future Improvements](#future-improvements)
-- [License](#license)
+- [🧰 Tech Stack](#tech-stack)
+- [🚀 Getting Started](#getting-started)
+- [📂 Project Structure](#project-structure)
+- [🔮 Future Improvements](#future-improvements)
+- [📄 License](#license)
 
 ---
 
-## Features
+## ✨ Features
 
-### Profile
+### 👤 Profile
 
 - **Authentication**
   - Login with email and password
@@ -49,7 +51,7 @@ AnimBro is a Kotlin-based Android application for anime fans. It provides a comp
 
 ---
 
-### WatchList
+### 📺 WatchList
 
 Organize and track your anime with multiple list states:
 
@@ -65,7 +67,7 @@ Each status can be tied to the MyAnimeList list status to keep everything in syn
 
 ---
 
-### Comments & Ratings
+### 💬 Comments & Ratings
 
 - **Global Rating**
   - Aggregated rating based on all users’ scores
@@ -77,7 +79,7 @@ Each status can be tied to the MyAnimeList list status to keep everything in syn
 
 ---
 
-### Favorites
+### ❤️ Favorites
 
 - Mark anime as **Favorite**
 - Quickly access your favorite anime from the **Favourite Screen**
@@ -85,7 +87,7 @@ Each status can be tied to the MyAnimeList list status to keep everything in syn
 
 ---
 
-### My Anime List Integration
+### 🔗 My Anime List Integration
 
 AnimBro integrates with **MyAnimeList (MAL) v2 API** to manage user anime lists.
 
@@ -102,7 +104,7 @@ Core integration points:
 
 ---
 
-### Anime Details
+### ℹ️ Anime Details
 
 The **Anime Details Screen** shows detailed information about each anime (depending on the API):
 
@@ -118,7 +120,7 @@ The **Anime Details Screen** shows detailed information about each anime (depend
 
 ---
 
-### Home Page
+### 🏠 Home Page
 
 The **Home Screen** acts as the main discovery hub and may include sections like:
 
@@ -131,7 +133,7 @@ These sections can be backed by the MyAnimeList API or a custom backend.
 
 ---
 
-### Notifications
+### 🔔 Notifications
 
 Stay up to date with background notifications:
 
@@ -147,7 +149,7 @@ Stay up to date with background notifications:
 
 ---
 
-## Screens
+## 🖥️ Screens
 
 ### Login Screen
 
@@ -248,7 +250,7 @@ Stay up to date with background notifications:
 
 ---
 
-## Tech Stack
+## 🧰 Tech Stack
 
 - **Language:** Kotlin (100%)
 - **Platform:** Android
@@ -266,7 +268,7 @@ Stay up to date with background notifications:
 
 ---
 
-## Getting Started
+## 🚀 Getting Started
 
 > The exact steps may vary depending on how the project is configured. Below is a generic setup flow.
 
@@ -303,7 +305,7 @@ Stay up to date with background notifications:
 
 ---
 
-## Project Structure
+## 📂 Project Structure
 
 A possible high-level structure (the actual structure in the repo may differ):
 
@@ -326,7 +328,7 @@ A possible high-level structure (the actual structure in the repo may differ):
 
 ---
 
-## Future Improvements
+## 🔮 Future Improvements
 
 - Offline mode with caching for anime lists and details
 - More advanced recommendation engine
@@ -337,7 +339,7 @@ A possible high-level structure (the actual structure in the repo may differ):
 
 ---
 
-## License
+## 📄 License
 
 This project is licensed under the terms specified in the repository (e.g., MIT, Apache 2.0, or proprietary).  
 Please check the `LICENSE` file in this repo for full details.
