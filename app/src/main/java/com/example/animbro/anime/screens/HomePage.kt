@@ -112,9 +112,7 @@ class HomeActivity : ComponentActivity() {
 
 @Composable
 fun HeaderSection(
-    onSearchClick: () -> Unit,
-    onRandomAnimeClick: () -> Unit,
-    isRandomLoading: Boolean
+    onSearchClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -148,33 +146,6 @@ fun HeaderSection(
             }
         }
 
-        Spacer(modifier = Modifier.width(12.dp))
-
-        // Random Anime Button
-        IconButton(
-            onClick = {
-                if (!isRandomLoading) {
-                    onRandomAnimeClick()
-                }
-            },
-            modifier = Modifier
-                .size(50.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(MaterialTheme.colorScheme.primaryContainer)
-        ) {
-            if (isRandomLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(24.dp),
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            } else {
-                Icon(
-                    painter = painterResource(R.drawable.ic_dice),
-                    contentDescription = "Random Anime",
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            }
-        }
     }
 }
 
@@ -219,7 +190,6 @@ fun HomeScreen(
                     CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                 }
             }
-
             uiState.error != null -> {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -251,7 +221,6 @@ fun HomeScreen(
                     }
                 }
             }
-
             else -> {
                 LazyColumn(
                     modifier = Modifier
@@ -261,9 +230,7 @@ fun HomeScreen(
                     // Header Section
                     item {
                         HeaderSection(
-                            onSearchClick = onSearchClick,
-                            onRandomAnimeClick = { viewModel.findRandomAnime() },
-                            isRandomLoading = uiState.isRandomLoading
+                            onSearchClick = onSearchClick
                         )
                     }
                     item {
@@ -271,9 +238,37 @@ fun HomeScreen(
                             viewModel = viewModel,
                             screenPadding = screenPadding,
                             onAnimeClick = onAnimeClick,
-                            onMoreClick = onMoreClick
+
                         )
                     }
+                }
+            }
+        }
+
+        // Floating Action Button for Random Anime
+        if (!uiState.isLoading && uiState.error == null) {
+            FloatingActionButton(
+                onClick = {
+                    if (!uiState.isRandomLoading) {
+                        viewModel.findRandomAnime()
+                    }
+                },
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(16.dp),
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+            ) {
+                if (uiState.isRandomLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                } else {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_dice),
+                        contentDescription = "Random Anime"
+                    )
                 }
             }
         }
@@ -285,7 +280,6 @@ fun HomeScreenContent(
     viewModel: HomeViewModel,
     screenPadding: Dp = 20.dp,
     onAnimeClick: (Int) -> Unit = {},
-    onMoreClick: (String) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
 

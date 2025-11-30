@@ -171,7 +171,8 @@ fun AppNavigation() {
                 }
             ) { paddingValues ->
                 ProfileScreen(
-                    modifier = Modifier.padding(paddingValues)
+                    modifier = Modifier.padding(paddingValues),
+                    navController = navController
                 )
             }
         }

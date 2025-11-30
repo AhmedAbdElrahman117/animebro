@@ -21,6 +21,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import com.example.animbro.R
@@ -45,6 +47,17 @@ import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
+import dagger.hilt.android.AndroidEntryPoint
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.animbro.anime.services.ProfileViewModel
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import com.example.animbro.anime.components.AnimeCard
+import androidx.compose.runtime.collectAsState
+import com.example.animbro.domain.models.Anime
+import com.example.animbro.anime.components.StatusUpdateDialog
+
+@AndroidEntryPoint
 class ProfileActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -64,8 +77,10 @@ class ProfileActivity : ComponentActivity() {
 @Composable
 fun ProfileScreen(
     modifier: Modifier = Modifier,
+    navController: NavController? = null,
     auth: FirebaseAuth? = null,
-    firestore: FirebaseFirestore? = null
+    firestore: FirebaseFirestore? = null,
+    viewModel: ProfileViewModel = hiltViewModel()
 ) {
     // Safely get Firebase instances only when not in preview
     val firebaseAuth = auth ?: try {
@@ -101,6 +116,22 @@ fun ProfileScreen(
         }
     }
 
+    val isDialogVisible by viewModel.isDialogVisible.collectAsState()
+    val currentCategory by viewModel.currentCategory.collectAsState()
+
+    if (isDialogVisible) {
+        StatusUpdateDialog(
+            currentStatus = currentCategory,
+            onDismissRequest = { viewModel.dismissDialog() },
+            onStatusSelected = { category ->
+                viewModel.updateAnimeStatus(category)
+            },
+            onRemoveClick = {
+                viewModel.removeAnimeFromList()
+            }
+        )
+    }
+
     val context = LocalContext.current
     val themePref = remember { ThemeManager(context) }
     var isDark by remember {
@@ -127,7 +158,7 @@ fun ProfileScreen(
                 contentDescription = "dark mode",
                 modifier = Modifier
                     .padding(top = 40.dp)
-                    .size(50.dp)
+                    .size(30.dp)
                     .clickable {
                         isDark = !isDark
                         themePref.setDarkMode(isDark)
@@ -138,45 +169,70 @@ fun ProfileScreen(
                 contentDescription = "Logout",
                 modifier = Modifier
                     .padding(top = 40.dp)
-                    .size(50.dp)
+                    .size(30.dp)
                     .clickable {
                         showLogoutDialog = true
                     }
             )
         }
+
         Column(
             modifier = Modifier
-                .align(Alignment.TopCenter)
-                .padding(top = 60.dp),
+                .fillMaxSize()
+                .padding(top = 80.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // Profile Image
             Image(
-                painter = painterResource(R.drawable.gojo),
+                painter = painterResource(if (isDark) R.drawable.person_white else R.drawable.person),
                 contentDescription = "profile picture",
                 modifier = Modifier
-                    .size(320.dp)
-                    .padding(top = 100.dp)
+                    .size(150.dp)
                     .clip(CircleShape)
             )
 
-            Spacer(modifier = Modifier.height(height = 40.dp))
+            Spacer(modifier = Modifier.height(height = 16.dp))
 
-            Text("UserName : $userName", fontWeight = FontWeight.ExtraBold, fontSize = 24.sp)
+            Text(userName, fontWeight = FontWeight.ExtraBold, fontSize = 24.sp)
 
+            Spacer(modifier = Modifier.height(height = 32.dp))
+
+            // Favorites Row
+            FavRow(
+                viewModel = viewModel,
+                onAnimeClick = { animeId ->
+                    navController?.let {
+                        // Navigate to anime details using the navigation controller
+                        it.navigate("anime_details/$animeId")
+                    }
+                },
+                onAddClick = { anime ->
+                    viewModel.openStatusDialog(anime)
+                },
+                onFavClick = { anime ->
+                    viewModel.toggleFavorite(anime)
+                }
+            )
         }
 
     }
+
     if (showLogoutDialog) {
         AlertDialog(
             onDismissRequest = { showLogoutDialog = false },
             title = { Text("Confirm Logout") },
-            text = { Text("Do You Realy want to Logout ? ") },
+            text = { Text("Do You Really want to Logout?") },
             confirmButton = {
                 TextButton(
                     onClick = {
-                        auth?.signOut()
+                        firebaseAuth?.signOut()
                         showLogoutDialog = false
-                        //navController.navigate("login")  -> تودي لصفحة اللوج ان لو هنستخد النافيجيشن كونترولر
+                        // Navigate to login screen
+                        navController?.let {
+                            it.navigate("login") {
+                                popUpTo(0) { inclusive = true }
+                            }
+                        }
                     }
                 ) {
                     Text("Yes")
@@ -190,6 +246,55 @@ fun ProfileScreen(
         )
     }
 }
+
+
+
+@Composable
+fun FavRow(
+    viewModel: ProfileViewModel,
+    onAnimeClick: (Int) -> Unit,
+    onAddClick: (Anime) -> Unit,
+    onFavClick: (Anime) -> Unit
+) {
+    val favorites by viewModel.favoriteAnime.collectAsState()
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        Text(
+            text = "Favorite Anime",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+
+        if (favorites.isEmpty()) {
+            Text(
+                text = "No favorites yet",
+                modifier = Modifier.padding(start = 8.dp),
+                color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        } else {
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp)
+            ) {
+                items(favorites) { anime ->
+                    AnimeCard(
+                        anime = anime,
+                        onClick = { onAnimeClick(anime.id) },
+                        onAddClick = { onAddClick(anime) },
+                        onFavClick = { onFavClick(anime) }
+                    )
+                }
+            }
+        }
+    }
+}
+
+
+
 
 @Preview( showBackground = true)
 @Composable

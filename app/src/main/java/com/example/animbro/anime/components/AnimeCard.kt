@@ -22,7 +22,7 @@ fun AnimeCard(
     anime: Anime,
     onClick: () -> Unit,
     onAddClick: (Anime) -> Unit,
-    onFavClick: (Anime) -> Unit
+    onFavClick: (Anime) -> Unit = {}
 ) {
     Card(
         modifier = Modifier
