@@ -1,7 +1,5 @@
 package com.example.animbro.anime.components
 
-import android.content.Context
-import android.content.Intent
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
@@ -11,42 +9,32 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.animbro.anime.screens.AnimeListActivity
-import com.example.animbro.anime.screens.AnimeListPage
-import com.example.animbro.anime.screens.HomeActivity
-import com.example.animbro.anime.screens.SearchActivity
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import com.example.animbro.navigation.Screen
 import com.example.animbro.ui.theme.AnimBroTheme
 
 
 sealed class BottomNavItem(
     val route: String,
     val icon: ImageVector,
-    val title: String,
-    val activityClass: Class<*>
+    val title: String
 ) {
-    object Home : BottomNavItem("home", Icons.Default.Home, "Home", HomeActivity::class.java)
-    object Search : BottomNavItem("search", Icons.Default.Search, "Search", SearchActivity::class.java)
-    object AnimeList : BottomNavItem("animelist", Icons.Default.List, "My List", AnimeListActivity::class.java)
-    // object Profile : BottomNavItem("profile", Icons.Default.Person, "Profile", ProfileActivity::class.java)
+    object Home : BottomNavItem(Screen.Home.route, Icons.Default.Home, "Home")
+    object Search : BottomNavItem(Screen.Search.route, Icons.Default.Search, "Search")
+    object AnimeList : BottomNavItem(Screen.AnimeList.route, Icons.Default.List, "My List")
 }
 
 @Composable
 fun BottomNavigationBar(
-    currentRoute: String,
-    onNavigate: (Context, Class<*>) -> Unit = { context, activityClass ->
-        val intent = Intent(context, activityClass)
-        intent.flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
-        context.startActivity(intent)
-    }
+    navController: NavController,
+    currentRoute: String
 ) {
-    val context = LocalContext.current
     val items = listOf(
         BottomNavItem.Home,
         BottomNavItem.Search,
-        BottomNavItem.AnimeList,
-        // BottomNavItem.Profile
+        BottomNavItem.AnimeList
     )
 
     NavigationBar(
@@ -65,7 +53,16 @@ fun BottomNavigationBar(
                 selected = currentRoute == item.route,
                 onClick = {
                     if (currentRoute != item.route) {
-                        onNavigate(context, item.activityClass)
+                        navController.navigate(item.route) {
+                            // Pop up to the start destination to avoid building up a large stack
+                            popUpTo(Screen.Home.route) {
+                                saveState = true
+                            }
+                            // Avoid multiple copies of the same destination
+                            launchSingleTop = true
+                            // Restore state when navigating back
+                            restoreState = true
+                        }
                     }
                 },
                 colors = NavigationBarItemDefaults.colors(
@@ -85,8 +82,8 @@ fun BottomNavigationBar(
 fun BottomNavigationBarPreview_Home() {
     AnimBroTheme {
         BottomNavigationBar(
-            currentRoute = "home",
-            onNavigate = { _, _ -> } // No-op for preview
+            navController = rememberNavController(),
+            currentRoute = Screen.Home.route
         )
     }
 }
