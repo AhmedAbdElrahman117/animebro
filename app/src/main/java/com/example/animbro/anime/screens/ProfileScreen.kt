@@ -62,15 +62,17 @@ class ProfileActivity : ComponentActivity() {
 
 
 @Composable
-fun ProfileScreen( modifier: Modifier = Modifier) {
+fun ProfileScreen(
+    modifier: Modifier = Modifier,
+    auth: FirebaseAuth? = try { FirebaseAuth.getInstance() } catch (e: Exception) { null },
+    firestore: FirebaseFirestore? = try { FirebaseFirestore.getInstance() } catch (e: Exception) { null }
+) {
 
     var userName by remember { mutableStateOf("Loading...") }
-    val auth = FirebaseAuth.getInstance()
-    val firestore = FirebaseFirestore.getInstance()
     var showLogoutDialog by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
-        val uid = auth.currentUser?.uid
-        if (uid != null) {
+        val uid = auth?.currentUser?.uid
+        if (uid != null && firestore != null) {
             firestore.collection("users")
                 .document(uid)
                 .get()
@@ -81,7 +83,7 @@ fun ProfileScreen( modifier: Modifier = Modifier) {
                     userName = "Error"
                 }
         } else {
-            userName = "Not Logged In"
+            userName = "Preview User"
         }
     }
     val context = LocalContext.current
@@ -157,7 +159,7 @@ fun ProfileScreen( modifier: Modifier = Modifier) {
             confirmButton = {
                 TextButton(
                     onClick = {
-                        auth.signOut()
+                        auth?.signOut()
                         showLogoutDialog = false
                         //navController.navigate("login")  -> تودي لصفحة اللوج ان لو هنستخد النافيجيشن كونترولر
                     }
@@ -174,7 +176,7 @@ fun ProfileScreen( modifier: Modifier = Modifier) {
     }
 }
 
-@Preview(device = "spec:width=411dp,height=891dp", showSystemUi = true, showBackground = false)
+@Preview( showBackground = true)
 @Composable
 private fun ProfileScreenPreview() {
     ProfileScreen()
