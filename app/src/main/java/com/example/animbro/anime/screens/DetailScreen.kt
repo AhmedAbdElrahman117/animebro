@@ -163,7 +163,9 @@ fun DetailScreen(
                     screenPadding = 20.dp,
                     onCardClick = onAnimeClick,
                     onSavedClick = { viewModel.onAddClick() },
-                    onBackClick = onBackClick
+                    onBackClick = onBackClick,
+                    isFavourite = uiState.isFavourite,
+                    onFavClick = { viewModel.onFavoriteClick() }
                 )
             }
         }
@@ -176,6 +178,8 @@ fun DetailContent(
     screenPadding: Dp = 20.dp,
     onCardClick: (Int) -> Unit = {},
     onSavedClick: () -> Unit = {},
+    isFavourite: Boolean = false,
+    onFavClick: () -> Unit = {},
     onBackClick: () -> Unit = {}
 ) {
     var currentTab by remember { mutableStateOf(DetailTab.DETAILS) }
@@ -200,6 +204,8 @@ fun DetailContent(
             selectedTab = currentTab,
             onTabSelected = { newTab -> currentTab = newTab },
             onSavedClick = onSavedClick,
+            isFavourite = isFavourite,
+            onFavClick = onFavClick,
             onBackClick = onBackClick
         )
 
@@ -561,6 +567,8 @@ fun AnimePosterSection(
     selectedTab: DetailTab,
     onTabSelected: (DetailTab) -> Unit,
     onSavedClick: () -> Unit,
+    isFavourite: Boolean,
+    onFavClick: () -> Unit,
     onBackClick: () -> Unit
 ) {
     Box(
@@ -599,6 +607,8 @@ fun AnimePosterSection(
                 .padding(top = 40.dp)
                 .align(Alignment.TopCenter),
             onSavedClick = onSavedClick,
+            isFavourite = isFavourite,
+            onFavClick = onFavClick,
             onBackClick = onBackClick
         )
 

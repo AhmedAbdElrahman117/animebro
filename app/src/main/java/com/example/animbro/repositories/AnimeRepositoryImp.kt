@@ -96,24 +96,20 @@ class AnimeRepositoryImp @Inject constructor(
     }
 
     override suspend fun addToWatchList(anime: Anime, category: String) {
-        try {
-            val watchListModel = WatchListModel(
-                id = anime.id,
-                title = anime.title,
-                image = anime.image?.medium ?: anime.image?.large,
-                category = category,
-                score = anime.score,
-                status = anime.status,
-                episodes = anime.episodes,
-                isFavourite = anime.isFavourite
-            )
+        val existingEntity = db.getAnimeById(anime.id)
 
-            Log.d("AnimeRepositoryImp", "Adding to watchlist: $watchListModel")
-            db.insertAnime(watchListModel)
-            Log.d("AnimeRepositoryImp", "Successfully added anime: ${anime.title}")
-        } catch (e: Exception) {
-            Log.e("AnimeRepositoryImp", "Error adding to watchlist", e)
-        }
+        val entityToSave = if (existingEntity != null) {
+            existingEntity.copy(
+                category = category,
+                title = anime.title,
+                image = anime.image?.large ?: anime.image?.medium,
+                score = existingEntity.score,
+                episodes = existingEntity.episodes,
+                isFavourite = existingEntity.isFavourite
+            )
+        } else anime.toDomain(category)
+
+        db.insertAnime(entityToSave)
     }
 
     override suspend fun removeFromWatchList(id: Int) {
@@ -121,6 +117,21 @@ class AnimeRepositoryImp @Inject constructor(
 
         if (anime != null)
             db.deleteAnime(anime)
+    }
+
+    override suspend fun isAnimeFavourite(id: Int): Boolean {
+        return db.getAnimeById(id)?.isFavourite == true
+    }
+
+    override suspend fun toggleFavourite(anime: Anime) {
+        val existing = db.getAnimeById(anime.id)
+
+        val newFavoriteState = !(existing?.isFavourite ?: false)
+
+        val entityToSave = existing?.copy(isFavourite = newFavoriteState)
+            ?: anime.toDomain(category = "").copy(isFavourite = true)
+
+        db.insertAnime(entityToSave)
     }
 
     override fun isDarkMode(): Flow<Boolean> {

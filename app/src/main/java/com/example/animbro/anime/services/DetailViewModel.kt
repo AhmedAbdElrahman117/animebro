@@ -17,7 +17,8 @@ data class DetailUiState(
     val isLoading: Boolean = false,
     val error: String? = null,
     val isDialogVisible: Boolean = false,
-    val currentAnimeStatus: String? = null
+    val currentAnimeStatus: String? = null,
+    val isFavourite: Boolean = false
 )
 
 @HiltViewModel
@@ -68,7 +69,13 @@ class DetailViewModel @Inject constructor(
     private fun checkLocalStatus(id: Int) {
         viewModelScope.launch {
             val status = repository.getAnimeCategory(id)
-            _uiState.value = _uiState.value.copy(currentAnimeStatus = status)
+
+            val isFav = repository.isAnimeFavourite(id)
+
+            _uiState.value = _uiState.value.copy(
+                currentAnimeStatus = status,
+                isFavourite = isFav
+            )
         }
     }
 
@@ -82,6 +89,18 @@ class DetailViewModel @Inject constructor(
 
     fun dismissDialog() {
         _uiState.value = _uiState.value.copy(isDialogVisible = false)
+    }
+
+    fun onFavoriteClick() {
+        val anime = _uiState.value.anime ?: return
+
+        viewModelScope.launch {
+            repository.toggleFavourite(anime)
+
+            _uiState.value = _uiState.value.copy(
+                isFavourite = !_uiState.value.isFavourite
+            )
+        }
     }
 
     fun updateAnimeStatus(category: String) {

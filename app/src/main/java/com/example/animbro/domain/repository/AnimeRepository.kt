@@ -16,6 +16,9 @@ interface AnimeRepository {
     suspend fun addToWatchList(anime: Anime, category: String)
     suspend fun removeFromWatchList(id: Int)
 
+    suspend fun isAnimeFavourite(id: Int): Boolean
+    suspend fun toggleFavourite(anime: Anime)
+
     fun isDarkMode(): Flow<Boolean>
     fun areNotificationsEnabled(): Flow<Boolean>
 
