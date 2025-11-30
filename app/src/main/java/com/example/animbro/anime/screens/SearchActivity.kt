@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -26,6 +27,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
@@ -61,7 +63,8 @@ class SearchActivity : ComponentActivity() {
                 ) { paddingValues ->
                     SearchScreen(
                         viewModel = viewModel,
-                        modifier = Modifier.padding(paddingValues)
+                        modifier = Modifier.padding(paddingValues),
+                        onBackClick = { finish() }
                     )
                 }
             }
@@ -70,11 +73,17 @@ class SearchActivity : ComponentActivity() {
 }
 
 @Composable
-fun SearchScreen(viewModel: SearchViewModel, modifier: Modifier = Modifier) {
+fun SearchScreen(viewModel: SearchViewModel, modifier: Modifier = Modifier, onBackClick: () -> Unit) {
     var query by remember { mutableStateOf("") }
     val uiState by viewModel.uiState.collectAsState()
     val darkBlue = MaterialTheme.colorScheme.onBackground
     val context = LocalContext.current
+
+    val focusRequester = remember { androidx.compose.ui.focus.FocusRequester() }
+
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+    }
 
     if (uiState.isDialogVisible) {
         com.example.animbro.anime.components.StatusUpdateDialog(
@@ -102,6 +111,14 @@ fun SearchScreen(viewModel: SearchViewModel, modifier: Modifier = Modifier) {
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back",
+                    tint = darkBlue,
+                    modifier = Modifier
+                        .padding(end = 8.dp)
+                        .clickable { onBackClick() }
+                )
+                Icon(
                     imageVector = Icons.Default.Search,
                     contentDescription = "Search Icon",
                     tint = darkBlue
@@ -121,7 +138,9 @@ fun SearchScreen(viewModel: SearchViewModel, modifier: Modifier = Modifier) {
                         singleLine = true,
                         cursorBrush = SolidColor(MaterialTheme.colorScheme.onBackground),
                         textStyle = TextStyle(color = darkBlue, fontWeight = FontWeight.Medium),
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .focusRequester(focusRequester)
                     )
                 }
             }

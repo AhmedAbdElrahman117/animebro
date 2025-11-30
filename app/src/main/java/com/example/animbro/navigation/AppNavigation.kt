@@ -131,7 +131,10 @@ fun AppNavigation() {
             ) { paddingValues ->
                 SearchScreen(
                     viewModel = viewModel,
-                    modifier = Modifier.padding(paddingValues)
+                    modifier = Modifier.padding(paddingValues),
+                    onBackClick = {
+                        navController.popBackStack()
+                    }
                 )
             }
         }
@@ -173,6 +176,9 @@ fun AppNavigation() {
                     viewModel = viewModel,
                     onAnimeClick = { newAnimeId ->
                         navController.navigate(Screen.AnimeDetails.createRoute(newAnimeId))
+                    },
+                    onBackClick = {
+                        navController.popBackStack()
                     }
                 )
             }

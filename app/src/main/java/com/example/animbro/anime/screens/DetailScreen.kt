@@ -89,7 +89,8 @@ class DetailActivity : ComponentActivity() {
                         viewModel = viewModel,
                         onAnimeClick = { newId ->
                             navigateToDetail(newId)
-                        }
+                        },
+                        onBackClick = { finish() }
                     )
                 }
             }
@@ -118,7 +119,8 @@ class DetailActivity : ComponentActivity() {
 @Composable
 fun DetailScreen(
     viewModel: DetailViewModel,
-    onAnimeClick: (Int) -> Unit
+    onAnimeClick: (Int) -> Unit,
+    onBackClick: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -160,7 +162,8 @@ fun DetailScreen(
                     anime = anime,
                     screenPadding = 20.dp,
                     onCardClick = onAnimeClick,
-                    onSavedClick = { viewModel.onAddClick() }
+                    onSavedClick = { viewModel.onAddClick() },
+                    onBackClick = onBackClick
                 )
             }
         }
@@ -172,7 +175,8 @@ fun DetailContent(
     anime: Anime,
     screenPadding: Dp = 20.dp,
     onCardClick: (Int) -> Unit = {},
-    onSavedClick: () -> Unit = {}
+    onSavedClick: () -> Unit = {},
+    onBackClick: () -> Unit = {}
 ) {
     var currentTab by remember { mutableStateOf(DetailTab.DETAILS) }
 
@@ -195,7 +199,8 @@ fun DetailContent(
             },
             selectedTab = currentTab,
             onTabSelected = { newTab -> currentTab = newTab },
-            onSavedClick = onSavedClick
+            onSavedClick = onSavedClick,
+            onBackClick = onBackClick
         )
 
         when (currentTab) {
@@ -555,7 +560,8 @@ fun AnimePosterSection(
     seasonInfo: String,
     selectedTab: DetailTab,
     onTabSelected: (DetailTab) -> Unit,
-    onSavedClick: () -> Unit
+    onSavedClick: () -> Unit,
+    onBackClick: () -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -587,12 +593,13 @@ fun AnimePosterSection(
         )
 
         Banner(
-            height = 24.dp,
+
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 20.dp)
+                .padding(top = 40.dp)
                 .align(Alignment.TopCenter),
-            onSavedClick = onSavedClick
+            onSavedClick = onSavedClick,
+            onBackClick = onBackClick
         )
 
         Box(
@@ -606,7 +613,7 @@ fun AnimePosterSection(
                     .padding(horizontal = 16.dp)
                     .fillMaxHeight()
             ) {
-                Spacer(Modifier.height(20.dp))
+                Spacer(Modifier.height(70.dp))
                 Text(
                     title,
                     style = MaterialTheme.typography.headlineLarge,

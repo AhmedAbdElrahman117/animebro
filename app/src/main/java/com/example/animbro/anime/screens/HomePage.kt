@@ -113,7 +113,8 @@ class HomeActivity : ComponentActivity() {
 @Composable
 fun HeaderSection(
     onSearchClick: () -> Unit,
-    onRandomAnimeClick: () -> Unit
+    onRandomAnimeClick: () -> Unit,
+    isRandomLoading: Boolean
 ) {
     Row(
         modifier = Modifier
@@ -151,17 +152,28 @@ fun HeaderSection(
 
         // Random Anime Button
         IconButton(
-            onClick = onRandomAnimeClick,
+            onClick = {
+                if (!isRandomLoading) {
+                    onRandomAnimeClick()
+                }
+            },
             modifier = Modifier
                 .size(50.dp)
                 .clip(RoundedCornerShape(12.dp))
                 .background(MaterialTheme.colorScheme.primaryContainer)
         ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_dice),
-                contentDescription = "Random Anime",
-                tint = MaterialTheme.colorScheme.onPrimaryContainer
-            )
+            if (isRandomLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            } else {
+                Icon(
+                    painter = painterResource(R.drawable.ic_dice),
+                    contentDescription = "Random Anime",
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
         }
     }
 }
@@ -248,7 +260,8 @@ fun HomeScreen(
                     item {
                         HeaderSection(
                             onSearchClick = onSearchClick,
-                            onRandomAnimeClick = { viewModel.findRandomAnime() }
+                            onRandomAnimeClick = { viewModel.findRandomAnime() },
+                            isRandomLoading = uiState.isRandomLoading
                         )
                     }
                     item {
@@ -293,7 +306,6 @@ fun HomeScreenContent(
             animeList = uiState.trendingAnime,
             screenPadding = screenPadding,
             onAnimeClick = onAnimeClick,
-            onMoreClick = { onMoreClick("Trending") },
             onAddClick = { anime -> viewModel.onAddClick(anime) }
         )
 
@@ -303,7 +315,6 @@ fun HomeScreenContent(
             animeList = uiState.topRankedAnime,
             screenPadding = screenPadding,
             onAnimeClick = onAnimeClick,
-            onMoreClick = { onMoreClick("Top Ranked") },
             onAddClick = { anime -> viewModel.onAddClick(anime) }
         )
 
@@ -313,17 +324,15 @@ fun HomeScreenContent(
             animeList = uiState.upcomingAnime,
             screenPadding = screenPadding,
             onAnimeClick = onAnimeClick,
-            onMoreClick = { onMoreClick("Upcoming") },
             onAddClick = { anime -> viewModel.onAddClick(anime) }
         )
 
         // Favourite Anime Section
         AnimeSection(
-            title = "Most Favourite Anime",
+            title = "Most Favourite",
             animeList = uiState.favouriteAnime,
             screenPadding = screenPadding,
             onAnimeClick = onAnimeClick,
-            onMoreClick = { onMoreClick("All Anime") },
             onAddClick = { anime -> viewModel.onAddClick(anime) }
         )
     }
@@ -352,7 +361,6 @@ fun AnimeSectionPreview() {
             animeList = getSampleAnimeList(),
             screenPadding = 20.dp,
             onAnimeClick = {},
-            onMoreClick = {},
             onAddClick = {}
         )
     }
@@ -382,16 +390,6 @@ fun PosterSectionPreview() {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun AnimeSectionRowPreview() {
-    MaterialTheme {
-        AnimeSectionRow(
-            title = "Trending",
-            onMoreClick = {}
-        )
-    }
-}
 
 // Preview Helper Functions
 private fun getSampleAnime() = Anime(
@@ -447,7 +445,6 @@ fun AnimeSection(
     animeList: List<Anime>,
     screenPadding: Dp,
     onAnimeClick: (Int) -> Unit,
-    onMoreClick: () -> Unit,
     onAddClick: (Anime) -> Unit
 ) {
     Column(
@@ -457,7 +454,6 @@ fun AnimeSection(
     ) {
         AnimeSectionRow(
             title = title,
-            onMoreClick = onMoreClick
         )
 
         if (animeList.isEmpty()) {
@@ -614,7 +610,7 @@ fun PosterSection(
 }
 
 @Composable
-fun AnimeSectionRow(title: String, onMoreClick: () -> Unit) {
+fun AnimeSectionRow(title: String) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -626,13 +622,7 @@ fun AnimeSectionRow(title: String, onMoreClick: () -> Unit) {
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.primary
         )
-        Text(
-            "more",
-            modifier = Modifier.clickable { onMoreClick() },
-            fontWeight = FontWeight.SemiBold,
-            color = colorResource(R.color.text_blue),
-            textDecoration = TextDecoration.Underline
-        )
+
     }
 }
 

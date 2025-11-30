@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -25,10 +26,11 @@ import com.example.animbro.R
 @Composable
 fun Banner(
     modifier: Modifier = Modifier,
-    height: Dp = 24.dp,
+    height: Dp = 35.dp,
     onFavClick: () -> Unit = {},
     onSavedClick: () -> Unit = {},
-    onAccClick: () -> Unit = {}
+    onAccClick: () -> Unit = {},
+    onBackClick: (() -> Unit)? = null
 ) {
     Row(
         modifier = modifier
@@ -39,14 +41,27 @@ fun Banner(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Image(
-            painter = painterResource(id = R.drawable.animebro_logo),
-            contentDescription = "Logo",
-            modifier = Modifier
-                .height(height)
-                .padding(start = 2.dp),
-            contentScale = ContentScale.Fit
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            if (onBackClick != null) {
+                androidx.compose.material3.Icon(
+                    imageVector = androidx.compose.material.icons.Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back",
+                    tint = Color.White,
+                    modifier = Modifier
+                        .size(height + 8.dp)
+                        .padding(end = 8.dp)
+                        .clickable { onBackClick() }
+                )
+            }
+            Image(
+                painter = painterResource(id = R.drawable.animebro_logo),
+                contentDescription = "Logo",
+                modifier = Modifier
+                    .height(height)
+                    .padding(start = 2.dp),
+                contentScale = ContentScale.Fit
+            )
+        }
         Row(verticalAlignment = Alignment.CenterVertically) {
             Image(
                 painter = painterResource(id = R.drawable.fav_ic),
@@ -71,10 +86,10 @@ fun Banner(
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = false)
 @Composable
 private fun BannerPreview() {
     Surface(color = MaterialTheme.colorScheme.background) {
-        Banner(height = 20.dp)
+        Banner()
     }
 }
