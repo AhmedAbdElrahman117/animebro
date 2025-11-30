@@ -64,16 +64,29 @@ class ProfileActivity : ComponentActivity() {
 @Composable
 fun ProfileScreen(
     modifier: Modifier = Modifier,
-    auth: FirebaseAuth? = try { FirebaseAuth.getInstance() } catch (e: Exception) { null },
-    firestore: FirebaseFirestore? = try { FirebaseFirestore.getInstance() } catch (e: Exception) { null }
+    auth: FirebaseAuth? = null,
+    firestore: FirebaseFirestore? = null
 ) {
+    // Safely get Firebase instances only when not in preview
+    val firebaseAuth = auth ?: try {
+        FirebaseAuth.getInstance()
+    } catch (e: IllegalStateException) {
+        null // Preview mode - Firebase not initialized
+    }
+
+    val firestoreInstance = firestore ?: try {
+        FirebaseFirestore.getInstance()
+    } catch (e: IllegalStateException) {
+        null // Preview mode - Firebase not initialized
+    }
 
     var userName by remember { mutableStateOf("Loading...") }
     var showLogoutDialog by remember { mutableStateOf(false) }
+
     LaunchedEffect(Unit) {
-        val uid = auth?.currentUser?.uid
-        if (uid != null && firestore != null) {
-            firestore.collection("users")
+        val uid = firebaseAuth?.currentUser?.uid
+        if (uid != null && firestoreInstance != null) {
+            firestoreInstance.collection("users")
                 .document(uid)
                 .get()
                 .addOnSuccessListener { doc ->
@@ -83,9 +96,11 @@ fun ProfileScreen(
                     userName = "Error"
                 }
         } else {
+            // Preview mode or not authenticated
             userName = "Preview User"
         }
     }
+
     val context = LocalContext.current
     val themePref = remember { ThemeManager(context) }
     var isDark by remember {
