@@ -95,6 +95,9 @@ class HomeActivity : ComponentActivity() {
                             },
                             onMoreClick = { section ->
                                 // TODO: Navigate to section list screen
+                            },
+                            onError = {
+                                // For HomeActivity usage, maybe show toast or do nothing if not main flow
                             }
                         )
                     }
@@ -155,7 +158,8 @@ fun HomeScreen(
     screenPadding: Dp = 20.dp,
     onAnimeClick: (Int) -> Unit = {},
     onMoreClick: (String) -> Unit = {},
-    onSearchClick: () -> Unit = {}
+    onSearchClick: () -> Unit = {},
+    onError: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
@@ -164,6 +168,12 @@ fun HomeScreen(
         uiState.randomAnimeId?.let { id ->
             onAnimeClick(id)
             viewModel.onRandomAnimeNavigated()
+        }
+    }
+
+    LaunchedEffect(uiState.error) {
+        if (uiState.error != null) {
+            onError()
         }
     }
 
@@ -191,35 +201,7 @@ fun HomeScreen(
                 }
             }
             uiState.error != null -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Warning,
-                            contentDescription = "Error",
-                            tint = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.size(64.dp)
-                        )
-                        Text(
-                            text = "No Internet Connection",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onBackground
-                        )
-                        Button(
-                            onClick = { viewModel.onRefresh() },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primary
-                            )
-                        ) {
-                            Text("Retry", color = MaterialTheme.colorScheme.onPrimary)
-                        }
-                    }
-                }
+                // Error handled by LaunchedEffect -> Navigation
             }
             else -> {
                 LazyColumn(

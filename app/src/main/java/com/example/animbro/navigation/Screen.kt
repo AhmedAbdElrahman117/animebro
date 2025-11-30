@@ -11,6 +11,7 @@ sealed class Screen(val route: String) {
     object Search : Screen("search")
     object AnimeList : Screen("anime_list")
     object Profile : Screen("profile")
+    object Error : Screen("error")
 
     // Detail Screen with parameter
     object AnimeDetails : Screen("anime_details/{animeId}") {

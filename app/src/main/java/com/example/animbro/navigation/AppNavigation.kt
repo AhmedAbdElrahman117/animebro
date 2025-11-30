@@ -14,6 +14,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.animbro.anime.screens.DetailScreen
+import com.example.animbro.anime.screens.ErrorScreen
 import com.example.animbro.anime.screens.HomeScreen
 import com.example.animbro.anime.screens.SearchScreen
 import com.example.animbro.anime.screens.UserListScreen
@@ -89,6 +90,16 @@ fun AppNavigation() {
             )
         }
 
+        composable(Screen.Error.route) {
+            ErrorScreen(
+                onRetry = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Error.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+
         // Main App Screens with Bottom Navigation
         composable(Screen.Home.route) {
             val viewModel: HomeViewModel = hiltViewModel()
@@ -113,6 +124,11 @@ fun AppNavigation() {
                         },
                         onSearchClick = {
                             navController.navigate(Screen.Search.route)
+                        },
+                        onError = {
+                            navController.navigate(Screen.Error.route) {
+                                popUpTo(Screen.Home.route) { inclusive = true }
+                            }
                         }
                     )
                 }
