@@ -358,22 +358,4 @@ fun SignWithGoogleButton(modifier: Modifier = Modifier, label: String, onClick: 
     }
 }
 
-@Composable
-fun googleAuthLauncher(context: Activity?): ManagedActivityResultLauncher<Intent, ActivityResult> {
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        AuthService().signWithGoogle(
-            result, context!!,
-            {
-                Toast.makeText(context, "Success", Toast.LENGTH_SHORT)
-                    .show()
-            },
-            {
-                Toast.makeText(context, it, Toast.LENGTH_SHORT)
-                    .show()
-            },
-        );
-    }
-    return launcher
-}
+

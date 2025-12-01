@@ -1,12 +1,11 @@
 package com.example.animbro.auth.screens
 
-import AuthViewModel
+import com.example.animbro.auth.viewModel.AuthViewModel
 import android.widget.Toast
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -30,11 +29,8 @@ import com.example.animbro.auth.CustomDivider
 import com.example.animbro.auth.EmailTextField
 import com.example.animbro.auth.PasswordTextField
 import com.example.animbro.auth.SignWithGoogleButton
-import com.example.animbro.auth.googleAuthLauncher
 import com.example.animbro.auth.repository.ErrorCause
 import com.example.animbro.auth.repository.LoginRepository
-import com.example.animbro.auth.service.AuthService
-import com.example.animbro.repositories.AnimeRepositoryImp
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException

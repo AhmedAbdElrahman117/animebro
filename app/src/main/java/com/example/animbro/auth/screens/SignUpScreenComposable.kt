@@ -26,7 +26,6 @@ import com.example.animbro.auth.CustomDivider
 import com.example.animbro.auth.EmailTextField
 import com.example.animbro.auth.PasswordTextField
 import com.example.animbro.auth.SignWithGoogleButton
-import com.example.animbro.auth.googleAuthLauncher
 import com.example.animbro.auth.repository.ErrorCause
 import com.example.animbro.auth.repository.SignUpRepository
 import com.google.android.gms.auth.api.signin.GoogleSignIn
