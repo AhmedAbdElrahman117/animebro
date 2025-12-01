@@ -4,6 +4,7 @@ import androidx.compose.material3.MaterialTheme
 
 import android.app.Activity
 import android.content.Intent
+import android.widget.Toast
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -266,7 +267,8 @@ fun ForegroundLayer(
         modifier = modifier
             .padding(20.dp)
             .fillMaxSize(),
-        colors = CardDefaults.cardColors().copy(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.65f)),
+        colors = CardDefaults.cardColors()
+            .copy(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.65f)),
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp),
         shape = RoundedCornerShape(24.dp),
         content = {
@@ -329,24 +331,9 @@ fun CustomDivider(modifier: Modifier) {
 }
 
 @Composable
-fun SignWithGoogleButton(modifier: Modifier = Modifier, label: String) {
-    val context = LocalActivity.current;
-
-    val launcher = googleAuthLauncher(context)
-
-
+fun SignWithGoogleButton(modifier: Modifier = Modifier, label: String, onClick: () -> Unit) {
     ElevatedButton(
-        onClick = {
-            val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(context!!.getString(R.string.default_web_client_id))
-                .requestEmail()
-                .requestProfile()
-                .build()
-
-            val googleSignInClient = GoogleSignIn.getClient(context, gso);
-
-            launcher.launch(googleSignInClient.signInIntent);
-        },
+        onClick = onClick,
         modifier = modifier,
         colors = ButtonDefaults.buttonColors().copy(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
@@ -376,7 +363,17 @@ fun googleAuthLauncher(context: Activity?): ManagedActivityResultLauncher<Intent
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
-        AuthService().signWithGoogle(result, context!!);
+        AuthService().signWithGoogle(
+            result, context!!,
+            {
+                Toast.makeText(context, "Success", Toast.LENGTH_SHORT)
+                    .show()
+            },
+            {
+                Toast.makeText(context, it, Toast.LENGTH_SHORT)
+                    .show()
+            },
+        );
     }
     return launcher
 }
