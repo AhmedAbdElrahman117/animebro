@@ -155,7 +155,7 @@ fun SignUpScreen(
             com.example.animbro.auth.SignUpButton(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 28.dp, vertical = 20.dp),
+                    .padding(horizontal = 28.dp, vertical = 12.dp),
                 email = email,
                 username = username,
                 password = password,
@@ -198,7 +198,7 @@ fun SignUpScreen(
             )
 
             CustomDivider(
-                modifier = Modifier.padding(vertical = 20.dp, horizontal = 28.dp)
+                modifier = Modifier.padding(vertical = 12.dp, horizontal = 28.dp)
             )
 
             SignWithGoogleButton(

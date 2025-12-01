@@ -300,7 +300,7 @@ fun Logo(modifier: Modifier = Modifier) {
 fun CustomDivider(modifier: Modifier) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(vertical = 16.dp, horizontal = 24.dp)
+        modifier = Modifier.padding(vertical = 12.dp, horizontal = 24.dp)
     ) {
         Card(
             modifier = Modifier
@@ -336,7 +336,7 @@ fun SignWithGoogleButton(modifier: Modifier = Modifier, label: String, onClick: 
         onClick = onClick,
         modifier = modifier,
         colors = ButtonDefaults.buttonColors().copy(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            containerColor = Color(0xFF16476A)
         ),
         elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp),
         shape = RoundedCornerShape(8.dp)
