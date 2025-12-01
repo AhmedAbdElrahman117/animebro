@@ -26,4 +26,10 @@ interface WatchListDAO {
     @Query("SELECT * FROM watchlist_table WHERE isFavourite = 1")
     fun getFavouriteAnime(): Flow<List<WatchListModel>>
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(animes: List<WatchListModel>)
+
+    @Query("DELETE FROM watchlist_table")
+    suspend fun deleteAll()
+
 }

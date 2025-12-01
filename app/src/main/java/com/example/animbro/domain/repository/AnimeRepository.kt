@@ -20,6 +20,10 @@ interface AnimeRepository {
     suspend fun isAnimeFavourite(id: Int): Boolean
     suspend fun toggleFavourite(anime: Anime)
 
+    suspend fun syncFromCloud()
+
+    suspend fun clearLocalDatabase()
+
     fun isDarkMode(): Flow<Boolean>
     fun areNotificationsEnabled(): Flow<Boolean>
 

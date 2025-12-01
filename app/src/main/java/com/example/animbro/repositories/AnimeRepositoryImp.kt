@@ -238,6 +238,60 @@ class AnimeRepositoryImp @Inject constructor(
         }
     }
 
+    override suspend fun syncFromCloud() {
+        val userId = auth.currentUser?.uid ?: return
+
+        try {
+            val snapshot = firestore.collection("users")
+                .document(userId)
+                .collection("watchlist")
+                .get()
+                .await()
+
+            val cloudAnimes = snapshot.documents.mapNotNull { doc ->
+                try {
+                    val id = doc.getLong("id")?.toInt()
+                    val title = doc.getString("title")
+                    val image = doc.getString("image_url")
+
+                    val category = doc.getString("category") ?: ""
+                    val isFavourite = doc.getBoolean("is_favourite") ?: false
+                    val score = doc.getDouble("score") ?: 0.0
+                    val episodes = doc.getLong("episodes")?.toInt() ?: 0
+                    val status = doc.getString("status") ?: ""
+
+                    if (id != null && title != null) {
+                        WatchListModel(
+                            id = id,
+                            title = title,
+                            image = image,
+                            category = category,
+                            isFavourite = isFavourite,
+                            score = score.toFloat(),
+                            episodes = episodes,
+                            status = status
+                        )
+                    } else null
+                } catch (e: Exception) {
+                    null
+                }
+            }
+
+            if (cloudAnimes.isNotEmpty()) {
+                db.deleteAll()
+                db.insertAll(cloudAnimes)
+            }
+
+        } catch (e: Exception) {
+            Log.e("Sync", "Error syncing data: ${e.message}")
+            e.printStackTrace()
+        }
+    }
+
+    override suspend fun clearLocalDatabase() {
+        db.deleteAll()
+    }
+
     override fun isDarkMode(): Flow<Boolean> {
         return preferencesManager.isDarkMode
     }
