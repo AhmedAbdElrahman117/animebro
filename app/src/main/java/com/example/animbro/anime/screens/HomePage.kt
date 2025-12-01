@@ -1,21 +1,18 @@
 package com.example.animbro.anime.screens
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.ui.platform.LocalContext
 import com.example.animbro.anime.components.AnimeCard
-
 import android.content.Intent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.Dp
@@ -25,11 +22,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import coil.compose.AsyncImage
 import com.example.animbro.domain.models.Anime
 import com.example.animbro.R
@@ -39,25 +35,18 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import com.example.animbro.ui.theme.AnimBroTheme
 import com.example.animbro.anime.services.HomeViewModel
-import com.example.animbro.anime.components.Banner
-
 import androidx.compose.ui.draw.clip
-import androidx.compose.material.icons.filled.Search
 import com.example.animbro.navigation.BottomNavigationBar
 import androidx.activity.viewModels
 import androidx.compose.foundation.Image
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import com.example.animbro.anime.components.StatusUpdateDialog
 import dagger.hilt.android.AndroidEntryPoint
-
-
 import androidx.navigation.compose.rememberNavController
+import androidx.compose.ui.draw.shadow
 
 @AndroidEntryPoint
 class HomeActivity : ComponentActivity() {
@@ -72,8 +61,6 @@ class HomeActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 val uiState by viewModel.uiState.collectAsState()
                 val context = LocalContext.current
-
-
 
                 Scaffold(
                     bottomBar = {
@@ -114,22 +101,31 @@ class HomeActivity : ComponentActivity() {
 }
 
 @Composable
-fun HeaderSection(
-    onSearchClick: () -> Unit
+fun StickySearchBar(
+    onSearchClick: () -> Unit,
+    isSticky: Boolean,
+    modifier: Modifier = Modifier
 ) {
-    Row(
-        modifier = Modifier
+    Box(
+        modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 10.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+            .padding(horizontal = 20.dp, vertical = 12.dp)
+            .then(
+                if (isSticky)
+                    Modifier
+                        .shadow(8.dp, RoundedCornerShape(25.dp))
+                        .background(
+                            MaterialTheme.colorScheme.surface,
+                            RoundedCornerShape(25.dp)
+                        )
+                else Modifier
+            )
     ) {
-        // Search Bar (Clickable Box)
         Box(
             modifier = Modifier
-                .weight(1f)
+                .fillMaxWidth()
                 .height(50.dp)
-                .clip(RoundedCornerShape(12.dp))
+                .clip(RoundedCornerShape(25.dp))
                 .background(MaterialTheme.colorScheme.surfaceVariant)
                 .clickable { onSearchClick() }
                 .padding(horizontal = 16.dp),
@@ -148,7 +144,6 @@ fun HeaderSection(
                 )
             }
         }
-
     }
 }
 
@@ -163,6 +158,14 @@ fun HomeScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
+    val listState = rememberLazyListState()
+
+    val showStickySearch by remember {
+        derivedStateOf {
+            listState.firstVisibleItemIndex > 1 ||
+                    (listState.firstVisibleItemIndex == 1 && listState.firstVisibleItemScrollOffset > 0)
+        }
+    }
 
     LaunchedEffect(uiState.randomAnimeId) {
         uiState.randomAnimeId?.let { id ->
@@ -204,23 +207,47 @@ fun HomeScreen(
                 // Error handled by LaunchedEffect -> Navigation
             }
             else -> {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.background)
-                ) {
-                    // Header Section
-                    item {
-                        HeaderSection(
-                            onSearchClick = onSearchClick
-                        )
+                Box(modifier = Modifier.fillMaxSize()) {
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colorScheme.background)
+                    ) {
+                        // Poster Section
+                        item {
+                            if (uiState.trendingAnime.isNotEmpty()) {
+                                val featuredAnime = uiState.trendingAnime.first()
+                                PosterSection(
+                                    anime = featuredAnime,
+                                    onDetailsClick = { onAnimeClick(featuredAnime.id) },
+                                    onTrailerClick = { /* Handle trailer */ }
+                                )
+                            }
+                        }
+                        // Search Bar
+                        item {
+                            StickySearchBar(
+                                onSearchClick = onSearchClick,
+                                isSticky = false
+                            )
+                        }
+                        // Main Content
+                        item {
+                            HomeScreenContent(
+                                viewModel = viewModel,
+                                screenPadding = screenPadding,
+                                onAnimeClick = onAnimeClick,
+                            )
+                        }
                     }
-                    item {
-                        HomeScreenContent(
-                            viewModel = viewModel,
-                            screenPadding = screenPadding,
-                            onAnimeClick = onAnimeClick,
-
+                    if (showStickySearch) {
+                        StickySearchBar(
+                            onSearchClick = onSearchClick,
+                            isSticky = true,
+                            modifier = Modifier
+                                .align(Alignment.TopCenter)
+                                .zIndex(10f)
                         )
                     }
                 }
@@ -269,15 +296,6 @@ fun HomeScreenContent(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-        if (uiState.trendingAnime.isNotEmpty()) {
-            val featuredAnime = uiState.trendingAnime.first()
-            PosterSection(
-                anime = featuredAnime,
-                onDetailsClick = { onAnimeClick(featuredAnime.id) },
-                onTrailerClick = { /* Handle trailer */ }
-            )
-        }
-
         // Trending Section
         AnimeSection(
             title = "Trending",
@@ -306,7 +324,6 @@ fun HomeScreenContent(
             onAnimeClick = onAnimeClick,
             onAddClick = { anime -> viewModel.onAddClick(anime) },
             onFavClick = { anime -> viewModel.onFavoriteClick(anime) }
-
         )
 
         // Favourite Anime Section
@@ -320,20 +337,6 @@ fun HomeScreenContent(
         )
     }
 }
-
-
-// Preview Functions
-//@Preview(showBackground = true, showSystemUi = true)
-//@Composable
-//fun HomeScreenPreview() {
-//    MaterialTheme {
-//        HomeScreen(
-//            viewModel = PreviewHomeViewModel(),
-//            onAnimeClick = {},
-//            onMoreClick = {}
-//        )
-//    }
-//}
 
 @Preview(showBackground = true)
 @Composable
@@ -375,8 +378,6 @@ fun PosterSectionPreview() {
     }
 }
 
-
-// Preview Helper Functions
 private fun getSampleAnime() = Anime(
     id = 1,
     title = "Attack on Titan",
@@ -405,25 +406,6 @@ private fun getSampleAnimeList() = listOf(
     getSampleAnime().copy(id = 5, title = "Steins;Gate", rank = 5)
 )
 
-// Preview ViewModel - Creates a mock ViewModel with sample data
-//private fun PreviewHomeViewModel(): HomeViewModel {
-//    val mockRepository = object : com.example.animbro.domain.repository.AnimeRepository {
-//        override suspend fun getTopRatedAnime(limit: Int) = getSampleAnimeList()
-//        override suspend fun getPopularAnime(limit: Int) = getSampleAnimeList()
-//        override suspend fun getUpcomingAnime(limit: Int) = getSampleAnimeList()
-//        override suspend fun getFavouritesAnime(limit: Int) = getSampleAnimeList()
-//        override suspend fun searchAnime(query: String) = getSampleAnimeList()
-//        override suspend fun getAnimeDetails(id: Int) = getSampleAnime()
-//        override fun getWatchListByCategory(category: String) =
-//            MutableStateFlow(getSampleAnimeList())
-//
-//        override suspend fun addToWatchList(anime: Anime, category: String) {}
-//        override suspend fun removeFromWatchList(id: Int) {}
-//    }
-//
-//    return HomeViewModel(mockRepository)
-//}
-
 @Composable
 fun AnimeSection(
     title: String,
@@ -438,9 +420,7 @@ fun AnimeSection(
             .fillMaxWidth()
             .padding(horizontal = screenPadding)
     ) {
-        AnimeSectionRow(
-            title = title,
-        )
+        AnimeSectionRow(title = title)
 
         if (animeList.isEmpty()) {
             Text(
@@ -479,7 +459,6 @@ fun PosterSection(
             .fillMaxWidth()
             .height(360.dp)
     ) {
-
         AsyncImage(
             model = anime.image?.large ?: anime.image?.medium,
             contentDescription = anime.title,
@@ -489,7 +468,6 @@ fun PosterSection(
             error = painterResource(R.drawable.poster_sample)
         )
 
-        // Gradient overlay
         Box(
             Modifier
                 .fillMaxSize()
@@ -504,13 +482,7 @@ fun PosterSection(
                     )
                 )
         )
-//        Banner(
-//            height = 24.dp,
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .padding(top = 20.dp)
-//                .align(Alignment.TopCenter)
-//        )
+
         Image(
             painter = painterResource(id = R.drawable.animebro_logo),
             contentDescription = "App Logo",
@@ -518,7 +490,7 @@ fun PosterSection(
                 .height(40.dp)
                 .align(Alignment.TopStart)
         )
-        // Content
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -565,7 +537,6 @@ fun PosterSection(
 
                 Spacer(Modifier.height(6.dp))
 
-                // Description
                 Text(
                     anime.description ?: "No description available",
                     color = Color.White,
@@ -577,7 +548,6 @@ fun PosterSection(
                 )
             }
 
-            // Buttons
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier
@@ -590,7 +560,6 @@ fun PosterSection(
                 ) {
                     Text("Details", color = MaterialTheme.colorScheme.primary)
                 }
-
             }
         }
     }
@@ -609,8 +578,5 @@ fun AnimeSectionRow(title: String) {
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.primary
         )
-
     }
 }
-
-
