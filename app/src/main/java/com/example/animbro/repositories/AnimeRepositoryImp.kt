@@ -30,25 +30,17 @@ class AnimeRepositoryImp @Inject constructor(
         rankingType: String,
         limit: Int,
     ): List<Anime> {
-        return try {
-            val response = api.getAnimeRanking(
-                limit = limit,
-                rankingType = rankingType
-            )
+        val response = api.getAnimeRanking(
+            limit = limit,
+            rankingType = rankingType
+        )
 
-            if (response.isSuccessful) {
-                Log.d("AnimeRepositoryImp", "getAnimeRanking: ${response.body()}")
-                response.body()?.data?.map { it.node.toDomain() } ?: emptyList()
-            } else {
-
-                Log.d("AnimeRepositoryImp", "getAnimeRanking is not successful")
-                emptyList()
-            }
-
-        } catch (e: Exception) {
-            Log.d("AnimeRepositoryImp", "getAnimeRanking: ${e.message}")
-            e.printStackTrace()
-            emptyList()
+        if (response.isSuccessful) {
+            Log.d("AnimeRepositoryImp", "getAnimeRanking: ${response.body()}")
+            return response.body()?.data?.map { it.node.toDomain() } ?: emptyList()
+        } else {
+            Log.d("AnimeRepositoryImp", "getAnimeRanking is not successful")
+            throw Exception("Failed to fetch anime ranking: ${response.code()}")
         }
     }
 
@@ -65,30 +57,22 @@ class AnimeRepositoryImp @Inject constructor(
         getAnimeRanking("favorite", limit)
 
     override suspend fun searchAnime(query: String): List<Anime> {
-        return try {
-            val response = api.searchAnime(query)
+        val response = api.searchAnime(query)
 
-            if (response.isSuccessful) {
-                response.body()?.data?.map { it.node.toDomain() } ?: emptyList()
-            } else emptyList()
-
-        } catch (e: Exception) {
-            e.printStackTrace()
-            emptyList()
+        if (response.isSuccessful) {
+            return response.body()?.data?.map { it.node.toDomain() } ?: emptyList()
+        } else {
+            throw Exception("Failed to search anime: ${response.code()}")
         }
     }
 
     override suspend fun getAnimeDetails(id: Int): Anime? {
-        return try {
-            val response = api.getAnimeDetails(id)
+        val response = api.getAnimeDetails(id)
 
-            if (response.isSuccessful) {
-                response.body()?.toDomain()
-            } else null
-
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
+        if (response.isSuccessful) {
+            return response.body()?.toDomain()
+        } else {
+            throw Exception("Failed to get anime details: ${response.code()}")
         }
     }
 
