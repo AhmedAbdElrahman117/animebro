@@ -26,7 +26,6 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.animbro.auth.screens.SignUp
 
 // Helper Composables for Auth Screens
 

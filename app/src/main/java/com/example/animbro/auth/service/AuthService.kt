@@ -41,7 +41,11 @@ class AuthService {
     }
 
 
-    fun signWithGoogle(result: ActivityResult, context: Context) {
+    fun signWithGoogle(
+        result: ActivityResult, context: Context,
+        onSuccess: () -> Unit?,
+        onFailure: (error: String) -> Unit?,
+    ) {
         val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
         try {
             val account = task.getResult(ApiException::class.java)
@@ -53,12 +57,17 @@ class AuthService {
                             UserProfileChangeRequest.Builder()
                                 .setDisplayName(account.displayName)
                                 .build()
-                        );
+                        )?.addOnSuccessListener {
+                            onSuccess();
+                        }?.addOnFailureListener {
+                            onFailure(it.message ?: "Unknown Error");
+                        };
+
                     }
                 }
             }
         } catch (e: ApiException) {
-            Toast.makeText(context, "Google Login Failed", Toast.LENGTH_SHORT).show()
+            onFailure(e.message ?: "Unknown Error with Google");
         }
     }
 
