@@ -63,6 +63,7 @@ class HomeViewModel @Inject constructor(
 
     private suspend fun loadTrendingAnime() {
         val anime = repository.getPopularAnime(limit = 10)
+
         _uiState.value = _uiState.value.copy(trendingAnime = anime)
     }
 

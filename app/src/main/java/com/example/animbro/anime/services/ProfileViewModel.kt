@@ -102,4 +102,16 @@ class ProfileViewModel @Inject constructor(
             }
         }
     }
+
+    fun onLogout() {
+        viewModelScope.launch {
+            try {
+                repository.clearLocalDatabase()
+
+                _favoriteAnime.value = emptyList()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
 }

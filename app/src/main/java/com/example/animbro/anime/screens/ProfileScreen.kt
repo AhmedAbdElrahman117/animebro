@@ -82,17 +82,16 @@ fun ProfileScreen(
     firestore: FirebaseFirestore? = null,
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
-    // Safely get Firebase instances only when not in preview
     val firebaseAuth = auth ?: try {
         FirebaseAuth.getInstance()
     } catch (e: IllegalStateException) {
-        null // Preview mode - Firebase not initialized
+        null
     }
 
     val firestoreInstance = firestore ?: try {
         FirebaseFirestore.getInstance()
     } catch (e: IllegalStateException) {
-        null // Preview mode - Firebase not initialized
+        null
     }
 
     var userName by remember { mutableStateOf("Loading...") }
@@ -111,7 +110,6 @@ fun ProfileScreen(
                     userName = "Error"
                 }
         } else {
-            // Preview mode or not authenticated
             userName = "Preview User"
         }
     }
@@ -182,7 +180,6 @@ fun ProfileScreen(
                 .padding(top = 80.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Profile Image
             Image(
                 painter = painterResource(if (isDark) R.drawable.person_white else R.drawable.person),
                 contentDescription = "profile picture",
@@ -197,12 +194,10 @@ fun ProfileScreen(
 
             Spacer(modifier = Modifier.height(height = 32.dp))
 
-            // Favorites Row
             FavRow(
                 viewModel = viewModel,
                 onAnimeClick = { animeId ->
                     navController?.let {
-                        // Navigate to anime details using the navigation controller
                         it.navigate("anime_details/$animeId")
                     }
                 },
@@ -226,8 +221,8 @@ fun ProfileScreen(
                 TextButton(
                     onClick = {
                         firebaseAuth?.signOut()
+                        viewModel.onLogout()
                         showLogoutDialog = false
-                        // Navigate to login screen
                         navController?.let {
                             it.navigate("login") {
                                 popUpTo(0) { inclusive = true }

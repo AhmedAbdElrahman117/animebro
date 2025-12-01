@@ -26,21 +26,51 @@ class AnimeRepositoryImp @Inject constructor(
     private val firestore: FirebaseFirestore
 ) : AnimeRepository {
 
+
+    private suspend fun mergeWithLocalData(apiList: List<Anime>): List<Anime> {
+        return apiList.map { apiAnime ->
+
+            val localEntity = db.getAnimeById(apiAnime.id)
+
+            if (localEntity != null) {
+                apiAnime.copy(
+                    isFavourite = localEntity.isFavourite,
+                )
+            } else {
+                apiAnime
+            }
+        }
+    }
+
     suspend fun getAnimeRanking(
         rankingType: String,
         limit: Int,
     ): List<Anime> {
-        val response = api.getAnimeRanking(
-            limit = limit,
-            rankingType = rankingType
-        )
+        return try {
+            val response = api.getAnimeRanking(
+                limit = limit,
+                rankingType = rankingType
+            )
 
-        if (response.isSuccessful) {
-            Log.d("AnimeRepositoryImp", "getAnimeRanking: ${response.body()}")
-            return response.body()?.data?.map { it.node.toDomain() } ?: emptyList()
-        } else {
-            Log.d("AnimeRepositoryImp", "getAnimeRanking is not successful")
-            throw Exception("Failed to fetch anime ranking: ${response.code()}")
+            if (response.isSuccessful) {
+                val rawList = response.body()?.data?.map { it.node.toDomain() } ?: emptyList()
+
+                val mergedList = mergeWithLocalData(rawList)
+
+                Log.d(
+                    "AnimeRepositoryImp",
+                    "Fetched ${mergedList.size} items. Merged with local DB."
+                )
+                return mergedList
+
+            } else {
+                Log.d("AnimeRepositoryImp", "getAnimeRanking is not successful")
+                emptyList()
+            }
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList()
         }
     }
 
