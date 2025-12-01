@@ -1,5 +1,6 @@
 package com.example.animbro.auth.screens
 
+import AuthViewModel
 import android.widget.Toast
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -22,6 +23,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.animbro.R
 import com.example.animbro.auth.AuthBackground
 import com.example.animbro.auth.CustomDivider
@@ -52,6 +54,7 @@ fun LoginScreen(
     val context = LocalContext.current
     val activity = LocalActivity.current
     var isLoading by remember { mutableStateOf(false) }
+    val myViewModel: AuthViewModel = hiltViewModel()
 
     // Google Sign-In Launcher
     val firebaseAuth = com.google.firebase.auth.FirebaseAuth.getInstance()
@@ -163,6 +166,7 @@ fun LoginScreen(
                             }
                         },
                         {
+                            myViewModel.sync();
                             isLoading = false
                             Toast.makeText(context, "Login successful", Toast.LENGTH_SHORT).show()
                             onLoginSuccess()
