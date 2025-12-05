@@ -1,5 +1,6 @@
 package com.example.animbro.anime.services
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.animbro.domain.models.Anime
@@ -25,19 +26,24 @@ class ProfileViewModel @Inject constructor(
 
     private fun getFavorites() {
         viewModelScope.launch {
-            // Fetching a limit of 10 favorites for the profile row
             repository.getUserFavouriteAnime().collect { favorites ->
                 _favoriteAnime.value = favorites
             }
         }
+
     }
 
-    // Dialog State
     private val _isDialogVisible = MutableStateFlow(false)
     val isDialogVisible: StateFlow<Boolean> = _isDialogVisible.asStateFlow()
 
     private val _currentCategory = MutableStateFlow<String?>(null)
     val currentCategory: StateFlow<String?> = _currentCategory.asStateFlow()
+
+    private val _favLoadingIds = MutableStateFlow<Set<Int>>(emptySet())
+    val favLoadingIds: StateFlow<Set<Int>> = _favLoadingIds.asStateFlow()
+
+    private val _addLoadingIds = MutableStateFlow<Set<Int>>(emptySet())
+    val addLoadingIds: StateFlow<Set<Int>> = _addLoadingIds.asStateFlow()
 
     private var _selectedAnime: Anime? = null
 
@@ -58,13 +64,15 @@ class ProfileViewModel @Inject constructor(
     fun updateAnimeStatus(category: String) {
         val anime = _selectedAnime ?: return
         viewModelScope.launch {
+            _addLoadingIds.value = _addLoadingIds.value + anime.id
             try {
                 repository.addToWatchList(anime, category)
                 dismissDialog()
-                // Refresh favorites in case status change affects it (though favorites are separate)
                 getFavorites()
             } catch (e: Exception) {
                 e.printStackTrace()
+            } finally {
+                _addLoadingIds.value = _addLoadingIds.value - anime.id
             }
         }
     }
@@ -72,23 +80,28 @@ class ProfileViewModel @Inject constructor(
     fun removeAnimeFromList() {
         val anime = _selectedAnime ?: return
         viewModelScope.launch {
+            _addLoadingIds.value = _addLoadingIds.value + anime.id
             try {
                 repository.removeFromWatchList(anime.id)
                 dismissDialog()
                 getFavorites()
             } catch (e: Exception) {
                 e.printStackTrace()
+            } finally {
+                _addLoadingIds.value = _addLoadingIds.value - anime.id
             }
         }
     }
 
     fun toggleFavorite(anime: Anime) {
         viewModelScope.launch {
+            _favLoadingIds.value = _favLoadingIds.value + anime.id
             try {
                 repository.toggleFavourite(anime)
-                // getFavorites() // No longer needed as Flow updates automatically
             } catch (e: Exception) {
                 e.printStackTrace()
+            } finally {
+                _favLoadingIds.value = _favLoadingIds.value - anime.id
             }
         }
     }

@@ -76,7 +76,6 @@ class DetailActivity : ComponentActivity() {
     private val viewModel: DetailViewModel by viewModels()
 
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -546,14 +545,14 @@ fun RecommendationCard(
                 error = painterResource(R.drawable.poster_sample)
             )
 
-            Icon(
-                painter = painterResource(id = R.drawable.fav_ic),
-                contentDescription = "fav",
-                tint = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(6.dp)
-            )
+//            Icon(
+//                painter = painterResource(id = R.drawable.fav_ic),
+//                contentDescription = "fav",
+//                tint = MaterialTheme.colorScheme.onSurface,
+//                modifier = Modifier
+//                    .align(Alignment.TopEnd)
+//                    .padding(6.dp)
+//            )
         }
     }
 }

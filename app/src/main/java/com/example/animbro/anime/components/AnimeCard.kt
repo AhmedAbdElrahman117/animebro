@@ -22,7 +22,9 @@ fun AnimeCard(
     anime: Anime,
     onClick: () -> Unit,
     onAddClick: (Anime) -> Unit,
-    onFavClick: (Anime) -> Unit = {}
+    onFavClick: (Anime) -> Unit = {},
+    isFavLoading: Boolean = false,
+    isAddLoading: Boolean = false
 ) {
     Card(
         modifier = Modifier
@@ -43,28 +45,50 @@ fun AnimeCard(
                 error = painterResource(R.drawable.poster_sample)
             )
 
-            Icon(
-                painter = painterResource(R.drawable.ic_add),
-                contentDescription = "Add",
-                tint = Color.White,
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .padding(8.dp)
-                    .clickable { onAddClick(anime) }
-            )
+            if (isAddLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(8.dp)
+                        .size(24.dp),
+                    color = Color.White,
+                    strokeWidth = 2.dp
+                )
+            } else {
+                Icon(
+                    painter = painterResource(R.drawable.ic_add),
+                    contentDescription = "Add",
+                    tint = Color.White,
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(8.dp)
+                        .clickable { onAddClick(anime) }
+                )
+            }
 
-            Icon(
-                painter = painterResource(
-                    if (anime.isFavourite) R.drawable.fav_ic else R.drawable.fav_ic
-                ),
-                contentDescription = "Favorite",
-                tint = if (anime.isFavourite) Color.Red else Color.White,
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(8.dp)
-                    .size(24.dp)
-                    .clickable { onFavClick(anime) }
-            )
+            if (isFavLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(8.dp)
+                        .size(24.dp),
+                    color = Color.Red,
+                    strokeWidth = 2.dp
+                )
+            } else {
+                Icon(
+                    painter = painterResource(
+                        if (anime.isFavourite) R.drawable.fav_ic else R.drawable.fav_ic
+                    ),
+                    contentDescription = "Favorite",
+                    tint = if (anime.isFavourite) Color.Red else Color.White,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(8.dp)
+                        .size(24.dp)
+                        .clickable { onFavClick(anime) }
+                )
+            }
 
             if (anime.rank != null && anime.rank > 0) {
                 Surface(

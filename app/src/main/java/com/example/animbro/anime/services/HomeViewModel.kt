@@ -25,7 +25,9 @@ data class HomeUiState(
     val randomError: String? = null,
     val selectedAnime: Anime? = null,
     val currentAnimeStatus: String? = null,
-    val isDialogVisible: Boolean = false
+    val isDialogVisible: Boolean = false,
+    val favLoadingIds: Set<Int> = emptySet(),
+    val addLoadingIds: Set<Int> = emptySet()
 )
 
 @HiltViewModel
@@ -153,8 +155,15 @@ class HomeViewModel @Inject constructor(
         val anime = _uiState.value.selectedAnime ?: return
 
         viewModelScope.launch {
-            repository.addToWatchList(anime, category)
-            dismissDialog()
+            _uiState.update { it.copy(addLoadingIds = it.addLoadingIds + anime.id) }
+            try {
+                repository.addToWatchList(anime, category)
+                dismissDialog()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                _uiState.update { it.copy(addLoadingIds = it.addLoadingIds - anime.id) }
+            }
         }
     }
 
@@ -162,8 +171,15 @@ class HomeViewModel @Inject constructor(
         val anime = _uiState.value.selectedAnime ?: return
 
         viewModelScope.launch {
-            repository.removeFromWatchList(anime.id)
-            dismissDialog()
+            _uiState.update { it.copy(addLoadingIds = it.addLoadingIds + anime.id) }
+            try {
+                repository.removeFromWatchList(anime.id)
+                dismissDialog()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                _uiState.update { it.copy(addLoadingIds = it.addLoadingIds - anime.id) }
+            }
         }
     }
 
@@ -176,28 +192,35 @@ class HomeViewModel @Inject constructor(
 
     fun onFavoriteClick(anime: Anime) {
         viewModelScope.launch {
-            repository.toggleFavourite(anime)
+            _uiState.update { it.copy(favLoadingIds = it.favLoadingIds + anime.id) }
+            try {
+                repository.toggleFavourite(anime)
 
-            _uiState.update { currentState ->
-                currentState.copy(
-                    trendingAnime = currentState.trendingAnime.map {
-                        if (it.id == anime.id) it.copy(isFavourite = !it.isFavourite) else it
-                    },
-                    topRankedAnime = currentState.topRankedAnime.map {
-                        if (it.id == anime.id) it.copy(isFavourite = !it.isFavourite) else it
-                    },
-                    upcomingAnime = currentState.upcomingAnime.map {
-                        if (it.id == anime.id) it.copy(isFavourite = !it.isFavourite) else it
-                    },
-                    favouriteAnime = if (anime.isFavourite) {
-                        currentState.favouriteAnime.filter { it.id != anime.id }
-                    } else {
-                        currentState.favouriteAnime + anime.copy(isFavourite = true)
-                    }
-                )
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        trendingAnime = currentState.trendingAnime.map {
+                            if (it.id == anime.id) it.copy(isFavourite = !it.isFavourite) else it
+                        },
+                        topRankedAnime = currentState.topRankedAnime.map {
+                            if (it.id == anime.id) it.copy(isFavourite = !it.isFavourite) else it
+                        },
+                        upcomingAnime = currentState.upcomingAnime.map {
+                            if (it.id == anime.id) it.copy(isFavourite = !it.isFavourite) else it
+                        },
+                        favouriteAnime = if (anime.isFavourite) {
+                            currentState.favouriteAnime.filter { it.id != anime.id }
+                        } else {
+                            currentState.favouriteAnime + anime.copy(isFavourite = true)
+                        }
+                    )
+                }
+
+                loadFavouriteAnime()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                _uiState.update { it.copy(favLoadingIds = it.favLoadingIds - anime.id) }
             }
-
-            loadFavouriteAnime()
         }
     }
 

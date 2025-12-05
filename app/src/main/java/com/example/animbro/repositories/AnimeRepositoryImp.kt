@@ -262,11 +262,11 @@ class AnimeRepositoryImp @Inject constructor(
                 .get()
                 .await()
 
-            val cloudAnimes = snapshot.documents.mapNotNull { doc ->
+            val cloudAnime = snapshot.documents.mapNotNull { doc ->
                 try {
                     val id = doc.getLong("id")?.toInt()
                     val title = doc.getString("title")
-                    val image = doc.getString("image_url")
+                    val image = doc.getString("image")
 
                     val category = doc.getString("category") ?: ""
                     val isFavourite = doc.getBoolean("is_favourite") ?: false
@@ -291,9 +291,9 @@ class AnimeRepositoryImp @Inject constructor(
                 }
             }
 
-            if (cloudAnimes.isNotEmpty()) {
+            if (cloudAnime.isNotEmpty()) {
                 db.deleteAll()
-                db.insertAll(cloudAnimes)
+                db.insertAll(cloudAnime)
             }
 
         } catch (e: Exception) {

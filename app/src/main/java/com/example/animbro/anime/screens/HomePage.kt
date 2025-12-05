@@ -303,7 +303,9 @@ fun HomeScreenContent(
             screenPadding = screenPadding,
             onAnimeClick = onAnimeClick,
             onAddClick = { anime -> viewModel.onAddClick(anime) },
-            onFavClick = { anime -> viewModel.onFavoriteClick(anime) }
+            onFavClick = { anime -> viewModel.onFavoriteClick(anime) },
+            favLoadingIds = uiState.favLoadingIds,
+            addLoadingIds = uiState.addLoadingIds
         )
 
         // Top Ranked Section
@@ -313,7 +315,9 @@ fun HomeScreenContent(
             screenPadding = screenPadding,
             onAnimeClick = onAnimeClick,
             onAddClick = { anime -> viewModel.onAddClick(anime) },
-            onFavClick = { anime -> viewModel.onFavoriteClick(anime) }
+            onFavClick = { anime -> viewModel.onFavoriteClick(anime) },
+            favLoadingIds = uiState.favLoadingIds,
+            addLoadingIds = uiState.addLoadingIds
         )
 
         // Upcoming Section
@@ -323,7 +327,9 @@ fun HomeScreenContent(
             screenPadding = screenPadding,
             onAnimeClick = onAnimeClick,
             onAddClick = { anime -> viewModel.onAddClick(anime) },
-            onFavClick = { anime -> viewModel.onFavoriteClick(anime) }
+            onFavClick = { anime -> viewModel.onFavoriteClick(anime) },
+            favLoadingIds = uiState.favLoadingIds,
+            addLoadingIds = uiState.addLoadingIds
         )
 
         // Favourite Anime Section
@@ -333,7 +339,9 @@ fun HomeScreenContent(
             screenPadding = screenPadding,
             onAnimeClick = onAnimeClick,
             onAddClick = { anime -> viewModel.onAddClick(anime) },
-            onFavClick = { anime -> viewModel.onFavoriteClick(anime) }
+            onFavClick = { anime -> viewModel.onFavoriteClick(anime) },
+            favLoadingIds = uiState.favLoadingIds,
+            addLoadingIds = uiState.addLoadingIds
         )
     }
 }
@@ -413,7 +421,9 @@ fun AnimeSection(
     screenPadding: Dp,
     onAnimeClick: (Int) -> Unit,
     onAddClick: (Anime) -> Unit,
-    onFavClick: (Anime) -> Unit
+    onFavClick: (Anime) -> Unit,
+    favLoadingIds: Set<Int> = emptySet(),
+    addLoadingIds: Set<Int> = emptySet()
 ) {
     Column(
         modifier = Modifier
@@ -440,7 +450,9 @@ fun AnimeSection(
                         anime = anime,
                         onClick = { onAnimeClick(anime.id) },
                         onAddClick = onAddClick,
-                        onFavClick = onFavClick
+                        onFavClick = onFavClick,
+                        isFavLoading = favLoadingIds.contains(anime.id),
+                        isAddLoading = addLoadingIds.contains(anime.id)
                     )
                 }
             }

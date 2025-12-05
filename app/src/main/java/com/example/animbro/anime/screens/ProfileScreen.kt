@@ -116,6 +116,8 @@ fun ProfileScreen(
 
     val isDialogVisible by viewModel.isDialogVisible.collectAsState()
     val currentCategory by viewModel.currentCategory.collectAsState()
+    val favLoadingIds by viewModel.favLoadingIds.collectAsState()
+    val addLoadingIds by viewModel.addLoadingIds.collectAsState()
 
     if (isDialogVisible) {
         StatusUpdateDialog(
@@ -196,6 +198,8 @@ fun ProfileScreen(
 
             FavRow(
                 viewModel = viewModel,
+                favLoadingIds = favLoadingIds,
+                addLoadingIds = addLoadingIds,
                 onAnimeClick = { animeId ->
                     navController?.let {
                         it.navigate("anime_details/$animeId")
@@ -247,6 +251,8 @@ fun ProfileScreen(
 @Composable
 fun FavRow(
     viewModel: ProfileViewModel,
+    favLoadingIds: Set<Int>,
+    addLoadingIds: Set<Int>,
     onAnimeClick: (Int) -> Unit,
     onAddClick: (Anime) -> Unit,
     onFavClick: (Anime) -> Unit
@@ -280,7 +286,9 @@ fun FavRow(
                         anime = anime,
                         onClick = { onAnimeClick(anime.id) },
                         onAddClick = { onAddClick(anime) },
-                        onFavClick = { onFavClick(anime) }
+                        onFavClick = { onFavClick(anime) },
+                        isFavLoading = favLoadingIds.contains(anime.id),
+                        isAddLoading = addLoadingIds.contains(anime.id)
                     )
                 }
             }
